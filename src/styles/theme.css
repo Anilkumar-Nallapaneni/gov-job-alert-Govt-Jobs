@@ -1,0 +1,13 @@
+/* Centralized color + size tokens for the site */
+:root{
+  --color-primary: #1f6feb;
+  --color-accent: #ffbf2e;
+  --color-cta: #f5503d;
+  --color-bg: #f6f8fb;
+  --color-surface: #ffffff;
+  --color-text: #17202a;
+  --color-muted: #6b7280;
+  --gradient-hero: linear-gradient(135deg,#6a63d8 0%,#5b8df6 55%,#49c6ff 100%);
+  --shadow-lg: 0 18px 50px rgba(6,18,40,0.14);
+  --radius-lg: 12px;
+}

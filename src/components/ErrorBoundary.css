@@ -1,0 +1,43 @@
+/* Error Boundary Container */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 40px 20px;
+  text-align: center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 12px;
+  margin: 20px;
+}
+
+.error-container h1 {
+  font-size: 2.5rem;
+  color: #e74c3c;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.error-container p {
+  font-size: 1.1rem;
+  color: #555;
+  margin: 0;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .error-container {
+    min-height: 300px;
+    padding: 30px 15px;
+  }
+
+  .error-container h1 {
+    font-size: 2rem;
+  }
+
+  .error-container p {
+    font-size: 1rem;
+  }
+}
+

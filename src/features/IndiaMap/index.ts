@@ -1,0 +1,1 @@
+export { IndiaMap } from '../../components/IndiaMap/IndiaMap';

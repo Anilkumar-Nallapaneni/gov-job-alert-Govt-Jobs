@@ -1,0 +1,1 @@
+export { default as Education } from '../../components/Education/Education';
