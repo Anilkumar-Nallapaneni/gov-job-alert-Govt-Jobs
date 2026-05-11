@@ -20,6 +20,11 @@
 .india-map-container path {
   transition: fill 0.2s ease, stroke 0.2s ease;
   cursor: pointer;
+  outline: none;
+}
+
+.india-map-container path:focus {
+  outline: none;
 }
 
 .india-map-svg-container {

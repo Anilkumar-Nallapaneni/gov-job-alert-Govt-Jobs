@@ -53,7 +53,6 @@ export default function App() {
         customData: {
           name: state.n,
           jobs: (stateCounts[state.id] || 0).toLocaleString(),
-          region: state.reg,
         },
       })),
     [stateCounts]

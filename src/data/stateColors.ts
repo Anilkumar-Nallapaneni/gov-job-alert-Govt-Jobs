@@ -4,7 +4,7 @@ const stateColors: { [key: string]: string } = {
     'IN-PB': '#45B7D1', // Punjab
     'IN-UK': '#96CEB4', // Uttarakhand
     'IN-HR': '#D4A5A5', // Haryana
-    'IN-RJ': '#99FFFF', // Rajasthan
+    'IN-RJ': '#D4A574', // Rajasthan (warm sand — avoids looking like a “selected” UI blue)
     'IN-UP': '#FFFF99', // Uttar Pradesh
     'IN-BR': '#FF99CC', // Bihar
     'IN-SK': '#99FF66', // Sikkim

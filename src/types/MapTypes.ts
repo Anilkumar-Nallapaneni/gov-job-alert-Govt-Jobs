@@ -27,6 +27,8 @@ export interface IndiaMapProps {
   stateData?: StateData[];
   onStateClick?: (stateId: string) => void;
   onStateHover?: (stateName: string) => void;
+  /** When this value changes (e.g. map filter cleared), all path fills reset to the palette — clears stuck hover / no persistent “selected” fill. */
+  selectionSyncKey?: string | null;
 }
 
 export const defaultMapStyle: MapStyle = {

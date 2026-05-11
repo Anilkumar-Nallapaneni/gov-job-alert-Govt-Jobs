@@ -3,15 +3,70 @@ import { STATES } from "@/data/states";
 
 const TOP_STATE_COUNT = 16;
 
-export default function StateStrip({ selected, onSelect, stateCounts }) {
+/**
+ * @param {"full" | "embedded" | "subheader"} variant
+ * - full: standalone bar (default), with background + bottom border
+ * - embedded: under map title, tight padding
+ * - subheader: chips only row, right-aligned in a flex bar (use with hideLabel)
+ */
+export default function StateStrip({ selected, onSelect, stateCounts, variant = "full", hideLabel }) {
   const sorted = [...STATES]
     .sort((a, b) => (stateCounts[b.id] || 0) - (stateCounts[a.id] || 0))
     .slice(0, TOP_STATE_COUNT);
 
+  const showLabel = hideLabel ? false : variant !== "subheader";
+
+  const wrapStyle =
+    variant === "subheader"
+      ? {
+          padding: 0,
+          margin: 0,
+          border: "none",
+          background: "transparent",
+          overflowX: "auto",
+          minWidth: 0,
+          width: "100%",
+        }
+      : variant === "embedded"
+        ? {
+            padding: "10px 0 12px",
+            marginBottom: 8,
+            borderBottom: `1px solid ${DS.border}`,
+            background: "transparent",
+            overflowX: "auto",
+          }
+        : {
+            padding: "12px 20px",
+            borderBottom: `1px solid ${DS.border}`,
+            background: DS.bg0,
+            overflowX: "auto",
+          };
+
+  const rowStyle = {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    minWidth: "max-content",
+    ...(variant === "subheader" ? { justifyContent: "flex-start" } : {}),
+  };
+
   return (
-    <div style={{ padding: "12px 20px", borderBottom: `1px solid ${DS.border}`, background: DS.bg0, overflowX: "auto" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: "max-content" }}>
-        <span style={{ fontSize: 10.5, color: DS.muted, fontWeight: 700, letterSpacing: 1, fontFamily: "'Outfit',sans-serif", flexShrink: 0 }}>TOP STATES:</span>
+    <div style={wrapStyle}>
+      <div className="state-strip-row" style={rowStyle}>
+        {showLabel && (
+          <span
+            style={{
+              fontSize: 10.5,
+              color: DS.muted,
+              fontWeight: 700,
+              letterSpacing: 1,
+              fontFamily: "'Outfit',sans-serif",
+              flexShrink: 0,
+            }}
+          >
+            TOP STATES:
+          </span>
+        )}
         <button
           onClick={() => onSelect(null)}
           style={{
@@ -52,7 +107,13 @@ export default function StateStrip({ selected, onSelect, stateCounts }) {
               }}
             >
               {s.ab}{" "}
-              <span style={{ fontFamily: "'JetBrains Mono',monospace", color: active ? "#FFAA00" : DS.muted, fontSize: 9.5 }}>
+              <span
+                style={{
+                  fontFamily: "'JetBrains Mono',monospace",
+                  color: active ? "#FFAA00" : DS.muted,
+                  fontSize: 9.5,
+                }}
+              >
                 {((stateCounts[s.id] || 0) / 1000).toFixed(0)}K
               </span>
             </button>

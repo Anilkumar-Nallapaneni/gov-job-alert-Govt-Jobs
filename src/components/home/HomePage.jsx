@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { DS, REGION_FILLS } from "@/theme/designSystem";
+import { useEffect, useMemo, useState } from "react";
+import { DS } from "@/theme/designSystem";
 import { STATES, toSvgStateId } from "@/data/states";
 import { CATS } from "@/data/categories";
 import { ALL_JOBS } from "@/data/jobs";
@@ -12,8 +12,36 @@ import Footer from "@/components/layout/Footer";
 
 const INITIAL_JOB_LIMIT = 8;
 const QUICK_FILTERS = ["10th Pass", "12th Pass", "Graduate", "Engineering", "Defence", "Banking", "Police"];
-const REGION_LABELS = { north: "North", south: "South", east: "East", west: "West", central: "Central", northeast: "NE" };
 
+/** Narrow state-mode job list by the quick pill (qualification / sector). */
+const jobMatchesQuickFilter = (job, filter) => {
+  const q = `${job.qual || ""} ${job.title || ""} ${job.dept || ""}`.toLowerCase();
+  const cat = job.category;
+  switch (filter) {
+    case "10th Pass":
+      return /\b10th\b|10\s*th|class\s*10|matric/i.test(q);
+    case "12th Pass":
+      return /12th|10\s*\+\s*2|intermediate|10\+2|hsc\b/i.test(q);
+    case "Graduate":
+      return /graduate|grad\.|b\.a|b\.sc|b\.com|b\.ed|degree|pg|post\s*grad|master/i.test(q);
+    case "Engineering":
+      return /engineer|b\.tech|b\.e\.|m\.tech|gate|diploma\s*\(eng|ece|cse|mechanical|civil/i.test(q);
+    case "Defence":
+      return cat === "defence";
+    case "Banking":
+      return cat === "banking";
+    case "Police":
+      return cat === "police";
+    default:
+      return true;
+  }
+};
+
+/** Jobs marked All India with every state in `stateIds` — hide when a single state is selected so the list shows state-relevant openings. */
+const isNationwideAllStatesJob = (job) =>
+  job.state === "All India" &&
+  Array.isArray(job.stateIds) &&
+  job.stateIds.length >= STATES.length;
 export default function HomePage({
   selectedState,
   setSelectedState,
@@ -26,6 +54,16 @@ export default function HomePage({
 }) {
   const [sort, setSort] = useState("lastDate");
   const [showAll, setShowAll] = useState(false);
+  /** Quick pills when a state is selected — filters scroll list only. */
+  const [stateQuickFilter, setStateQuickFilter] = useState(null);
+
+  useEffect(() => {
+    setShowAll(false);
+  }, [selectedState, activeCat, search]);
+
+  useEffect(() => {
+    setStateQuickFilter(null);
+  }, [selectedState]);
 
   const filtered = useMemo(() => {
     let j = [...ALL_JOBS];
@@ -43,16 +81,25 @@ export default function HomePage({
 
     if (selectedState) {
       const sn = STATES.find((s) => s.id === selectedState)?.n || "";
-      j = j.filter((x) => x.stateIds?.includes(selectedState) || x.state === "All India" || x.state === sn);
+      j = j.filter((x) => {
+        if (isNationwideAllStatesJob(x)) return false;
+        if (x.state === sn) return true;
+        const ids = x.stateIds;
+        return Boolean(Array.isArray(ids) && ids.length === 1 && ids[0] === selectedState);
+      });
     }
 
     if (activeCat) j = j.filter((x) => x.category === activeCat);
+
+    if (selectedState && stateQuickFilter) {
+      j = j.filter((x) => jobMatchesQuickFilter(x, stateQuickFilter));
+    }
 
     if (sort === "vacancies") j.sort((a, b) => b.vacancies - a.vacancies);
     else if (sort === "lastDate") j.sort((a, b) => new Date(a.lastDate) - new Date(b.lastDate));
 
     return j;
-  }, [selectedState, activeCat, sort, search]);
+  }, [selectedState, activeCat, sort, search, stateQuickFilter]);
 
   const displayed = showAll ? filtered : filtered.slice(0, INITIAL_JOB_LIMIT);
   const totalVac = ALL_JOBS.reduce((s, j) => s + j.vacancies, 0);
@@ -69,64 +116,111 @@ export default function HomePage({
         @media (max-width: 900px) {
           .home-hero-grid { grid-template-columns: 1fr !important; }
         }
+        .home-state-jobs-scroll::-webkit-scrollbar { width: 6px; }
+        .home-state-jobs-scroll::-webkit-scrollbar-track { background: transparent; }
+        .home-state-jobs-scroll::-webkit-scrollbar-thumb {
+          background: rgba(255, 107, 0, 0.35);
+          border-radius: 4px;
+        }
       `}</style>
-      <section style={{ padding: "36px 20px 28px", maxWidth: 1240, margin: "0 auto" }}>
+
+      {/* Row 1 — state strip only (under navbar) */}
+      <div
+        className="home-subheader"
+        style={{
+          borderBottom: `1px solid ${DS.border}`,
+          background: "rgba(3,6,13,0.98)",
+          backdropFilter: "blur(10px)",
+        }}
+      >
         <div
-          className="home-hero-grid"
-          style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)", gap: 40, alignItems: "start" }}
+          className="home-subheader__inner"
+          style={{
+            maxWidth: 1240,
+            margin: "0 auto",
+            padding: "10px 20px",
+            width: "100%",
+            minWidth: 0,
+            overflowX: "auto",
+          }}
         >
-          {/* Left – Hero copy */}
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
-              <div style={{ height: 2, width: 28, background: "linear-gradient(to right,#FF6B00,#FFAA00)" }} />
-              <span style={{ fontSize: 11, fontWeight: 700, color: DS.saffron, letterSpacing: 3, fontFamily: "monospace" }}>INDIA'S #1 GOVT JOBS PORTAL</span>
-            </div>
-            <h1 style={{ fontSize: 44, fontWeight: 900, color: DS.white, fontFamily: "'Sora',sans-serif", lineHeight: 1.05, marginBottom: 10, letterSpacing: 0.5 }}>
-              FIND YOUR<br />
-              <span style={{ WebkitTextStroke: "2px #FF6B00", WebkitTextFillColor: "transparent" }}>SARKARI</span>
-              <br />
-              <span style={{ color: DS.saffron }}>NAUKRI</span>
-            </h1>
-            <p style={{ fontSize: 14.5, color: DS.mutedHi, marginBottom: 24, lineHeight: 1.65, maxWidth: 440, fontFamily: "'Outfit',sans-serif" }}>
-              Real-time government job alerts from UPSC, SSC, Railways, Banking, Police & more. {totalVac.toLocaleString()} active vacancies across all 28 states.
-            </p>
+          <StateStrip variant="subheader" selected={selectedState} onSelect={setSelectedState} stateCounts={stateCounts} />
+        </div>
+      </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10, marginBottom: 20 }}>
-              {[
-                { v: totalVac.toLocaleString(), l: "Active Vacancies", i: "📋" },
-                { v: `${ALL_JOBS.filter((j) => j.status).length}`, l: "Hot/New Today", i: "🔥" },
-                { v: "28", l: "States Covered", i: "🗺️" },
-                { v: "10L+", l: "Monthly Users", i: "👥" },
-              ].map(({ v, l, i }) => (
-                <div key={l} style={{ background: DS.bg1, border: `1px solid ${DS.border}`, borderRadius: 12, padding: "12px 10px", textAlign: "center" }}>
-                  <div style={{ fontSize: 16, marginBottom: 4 }}>{i}</div>
-                  <div style={{ fontSize: 17, fontWeight: 800, color: DS.saffron, fontFamily: "'JetBrains Mono',monospace", lineHeight: 1 }}>{v}</div>
-                  <div style={{ fontSize: 9.5, color: DS.muted, marginTop: 4, fontFamily: "'Outfit',sans-serif" }}>{l}</div>
-                </div>
-              ))}
-            </div>
+      {/* Row 2 — tagline (hidden while a state is selected — “jobs scroll” mode) */}
+      <section style={{ padding: "0 20px 28px", maxWidth: 1240, margin: "0 auto" }}>
+        {!selectedState && (
+          <div
+            className="home-hero-tagline"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+              padding: "8px 0 14px",
+              marginBottom: 16,
+              width: "100%",
+            }}
+          >
+            <div style={{ height: 2, width: 28, background: "linear-gradient(to right,#FF6B00,#FFAA00)", flexShrink: 0 }} />
+            <span style={{ fontSize: 11, fontWeight: 700, color: DS.saffron, letterSpacing: 3, fontFamily: "monospace" }}>
+              {"INDIA'S #1 GOVT JOBS PORTAL"}
+            </span>
+          </div>
+        )}
 
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {QUICK_FILTERS.map((f) => (
-                <button
-                  key={f}
-                  style={{ background: DS.bg2, border: `1px solid ${DS.border}`, borderRadius: 20, padding: "5px 13px", fontSize: 11.5, color: DS.muted, cursor: "pointer", fontFamily: "'Outfit',sans-serif", transition: "all 0.12s" }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.border = `1px solid rgba(255,107,0,0.4)`;
-                    e.currentTarget.style.color = DS.saffron;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.border = `1px solid ${DS.border}`;
-                    e.currentTarget.style.color = DS.muted;
-                  }}
-                >
-                  {f}
-                </button>
-              ))}
+        {selectedState && (
+          <div
+            style={{
+              marginBottom: 20,
+              paddingBottom: 16,
+              borderBottom: `1px solid ${DS.border}`,
+              width: "100%",
+            }}
+          >
+            <div style={{ fontSize: 10.5, fontWeight: 700, color: DS.muted, letterSpacing: 1, fontFamily: "'Outfit',sans-serif", marginBottom: 10 }}>
+              FILTER LISTINGS
+            </div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+              {QUICK_FILTERS.map((f) => {
+                const on = stateQuickFilter === f;
+                return (
+                  <button
+                    key={f}
+                    type="button"
+                    onClick={() => setStateQuickFilter((prev) => (prev === f ? null : f))}
+                    style={{
+                      background: on ? "rgba(255,107,0,0.12)" : DS.bg2,
+                      border: `1px solid ${on ? "rgba(255,107,0,0.45)" : DS.border}`,
+                      borderRadius: 20,
+                      padding: "5px 13px",
+                      fontSize: 11.5,
+                      color: on ? DS.saffron : DS.muted,
+                      fontWeight: on ? 700 : 400,
+                      cursor: "pointer",
+                      fontFamily: "'Outfit',sans-serif",
+                      transition: "all 0.12s",
+                    }}
+                  >
+                    {f}
+                  </button>
+                );
+              })}
             </div>
           </div>
+        )}
 
-          {/* Right – Map */}
+        <div
+          className="home-hero-grid"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
+            gap: 40,
+            alignItems: selectedState ? "stretch" : "start",
+          }}
+        >
+          {/* Left – Map */}
           <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto" }}>
             <div style={{ width: "100%" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
@@ -136,6 +230,7 @@ export default function HomePage({
                 </div>
                 {selectedState && (
                   <button
+                    type="button"
                     onClick={() => setSelectedState(null)}
                     style={{ background: "transparent", border: `1px solid ${DS.border}`, borderRadius: 7, padding: "3px 10px", fontSize: 11, color: DS.muted, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}
                   >
@@ -162,89 +257,229 @@ export default function HomePage({
               <div style={{ background: DS.bg1, border: `1px solid ${DS.border}`, borderRadius: 14, padding: 10, overflow: "visible" }}>
                 <IndiaSvgMap
                   stateData={mapStateData}
+                  selectionSyncKey={selectedState ?? ""}
                   onStateClick={(svgId) => {
                     const matched = STATES.find((state) => toSvgStateId(state.id) === svgId);
                     setSelectedState(matched ? matched.id : null);
                   }}
                 />
               </div>
-
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10, justifyContent: "center" }}>
-                {Object.entries(REGION_LABELS).map(([k, l]) => (
-                  <div key={k} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 10, color: DS.muted, fontFamily: "'Outfit',sans-serif" }}>
-                    <div style={{ width: 9, height: 9, borderRadius: 2, background: REGION_FILLS[k].base, border: `1px solid ${REGION_FILLS[k].border}` }} />
-                    {l}
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      <StateStrip selected={selectedState} onSelect={setSelectedState} stateCounts={stateCounts} />
+          {/* Right — marketing hero OR scrollable state jobs only */}
+          <div
+            style={
+              selectedState
+                ? {
+                    display: "flex",
+                    flexDirection: "column",
+                    minHeight: 0,
+                    minWidth: 0,
+                    maxHeight: "min(calc(100vh - 160px), 720px)",
+                  }
+                : {}
+            }
+          >
+            {!selectedState ? (
+              <>
+                <h1 style={{ fontSize: 44, fontWeight: 900, color: DS.white, fontFamily: "'Sora',sans-serif", lineHeight: 1.05, marginBottom: 10, letterSpacing: 0.5 }}>
+                  FIND YOUR<br />
+                  <span style={{ WebkitTextStroke: "2px #FF6B00", WebkitTextFillColor: "transparent" }}>SARKARI</span>
+                  <br />
+                  <span style={{ color: DS.saffron }}>NAUKRI</span>
+                </h1>
+                <p style={{ fontSize: 14.5, color: DS.mutedHi, marginBottom: 24, lineHeight: 1.65, maxWidth: 440, fontFamily: "'Outfit',sans-serif" }}>
+                  Real-time government job alerts from UPSC, SSC, Railways, Banking, Police & more. {totalVac.toLocaleString()} active vacancies across all 28 states.
+                </p>
 
-      <section style={{ padding: "20px 20px 40px", maxWidth: 1240, margin: "0 auto" }}>
-        <CategoryGrid activeCat={activeCat} setActiveCat={setActiveCat} counts={categoryCounts} />
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10, marginBottom: 20 }}>
+                  {[
+                    { v: totalVac.toLocaleString(), l: "Active Vacancies", i: "📋" },
+                    { v: `${ALL_JOBS.filter((j) => j.status).length}`, l: "Hot/New Today", i: "🔥" },
+                    { v: "28", l: "States Covered", i: "🗺️" },
+                    { v: "10L+", l: "Monthly Users", i: "👥" },
+                  ].map(({ v, l, i }) => (
+                    <div key={l} style={{ background: DS.bg1, border: `1px solid ${DS.border}`, borderRadius: 12, padding: "12px 10px", textAlign: "center" }}>
+                      <div style={{ fontSize: 16, marginBottom: 4 }}>{i}</div>
+                      <div style={{ fontSize: 17, fontWeight: 800, color: DS.saffron, fontFamily: "'JetBrains Mono',monospace", lineHeight: 1 }}>{v}</div>
+                      <div style={{ fontSize: 9.5, color: DS.muted, marginTop: 4, fontFamily: "'Outfit',sans-serif" }}>{l}</div>
+                    </div>
+                  ))}
+                </div>
 
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-          <div>
-            <h2 style={{ fontSize: 16, fontWeight: 800, color: DS.white, fontFamily: "'Sora',sans-serif", margin: "0 0 3px" }}>
-              {stateName ? `Jobs in ${stateName}` : activeCat ? `${CATS.find((c) => c.id === activeCat)?.name || ""} Jobs` : search ? "Search Results" : "Latest Government Jobs"}
-            </h2>
-            <p style={{ fontSize: 12, color: DS.muted, fontFamily: "'Outfit',sans-serif", margin: 0 }}>
-              {filtered.length} jobs · {filtered.reduce((s, j) => s + j.vacancies, 0).toLocaleString()} total vacancies
-            </p>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 11.5, color: DS.muted, fontFamily: "'Outfit',sans-serif" }}>Sort:</span>
-            {["lastDate", "vacancies"].map((s) => (
-              <button
-                key={s}
-                onClick={() => setSort(s)}
-                style={{
-                  background: sort === s ? "rgba(255,107,0,0.12)" : "transparent",
-                  border: `1px solid ${sort === s ? "rgba(255,107,0,0.35)" : DS.border}`,
-                  borderRadius: 8,
-                  padding: "5px 12px",
-                  fontSize: 11.5,
-                  color: sort === s ? DS.saffron : DS.muted,
-                  cursor: "pointer",
-                  fontFamily: "'Outfit',sans-serif",
-                }}
-              >
-                {s === "lastDate" ? "Deadline" : "Vacancies"}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {filtered.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "60px 0", color: DS.muted, fontFamily: "'Outfit',sans-serif" }}>
-            <div style={{ fontSize: 44, marginBottom: 12 }}>📭</div>
-            <div style={{ fontSize: 17, fontWeight: 600, marginBottom: 6, color: DS.mutedHi }}>No jobs found</div>
-            <div style={{ fontSize: 13 }}>Try removing filters or selecting a different state</div>
-          </div>
-        ) : (
-          <>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              {displayed.map((job) => (
-                <JobCard key={job.id} job={job} onClick={() => onJobClick(job)} />
-              ))}
-            </div>
-            {!showAll && filtered.length > INITIAL_JOB_LIMIT && (
-              <div style={{ textAlign: "center", marginTop: 20 }}>
-                <button
-                  onClick={() => setShowAll(true)}
-                  style={{ background: DS.bg1, border: `1px solid rgba(255,107,0,0.35)`, borderRadius: 12, padding: "12px 32px", fontSize: 13, fontWeight: 600, color: DS.saffron, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  {QUICK_FILTERS.map((f) => (
+                    <button
+                      key={f}
+                      type="button"
+                      style={{ background: DS.bg2, border: `1px solid ${DS.border}`, borderRadius: 20, padding: "5px 13px", fontSize: 11.5, color: DS.muted, cursor: "pointer", fontFamily: "'Outfit',sans-serif", transition: "all 0.12s" }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.border = `1px solid rgba(255,107,0,0.4)`;
+                        e.currentTarget.style.color = DS.saffron;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.border = `1px solid ${DS.border}`;
+                        e.currentTarget.style.color = DS.muted;
+                      }}
+                    >
+                      {f}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 style={{ fontSize: 18, fontWeight: 800, color: DS.white, fontFamily: "'Sora',sans-serif", margin: "0 0 6px", flexShrink: 0 }}>
+                  {`Jobs in ${stateName}`}
+                </h2>
+                <p style={{ fontSize: 12, color: DS.muted, fontFamily: "'Outfit',sans-serif", margin: "0 0 12px", flexShrink: 0 }}>
+                  {filtered.length} listing{filtered.length !== 1 ? "s" : ""} ·{" "}
+                  {filtered.reduce((s, j) => s + j.vacancies, 0).toLocaleString()} vacancies
+                  {stateQuickFilter ? ` · ${stateQuickFilter}` : ""}
+                </p>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    flexWrap: "wrap",
+                    gap: 8,
+                    marginBottom: 10,
+                    flexShrink: 0,
+                  }}
                 >
-                  Load More Jobs ({filtered.length - INITIAL_JOB_LIMIT} more) ↓
-                </button>
-              </div>
+                  <span style={{ fontSize: 11.5, color: DS.muted, fontFamily: "'Outfit',sans-serif" }}>Sort:</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    {["lastDate", "vacancies"].map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setSort(s)}
+                        style={{
+                          background: sort === s ? "rgba(255,107,0,0.12)" : "transparent",
+                          border: `1px solid ${sort === s ? "rgba(255,107,0,0.35)" : DS.border}`,
+                          borderRadius: 8,
+                          padding: "5px 12px",
+                          fontSize: 11.5,
+                          color: sort === s ? DS.saffron : DS.muted,
+                          cursor: "pointer",
+                          fontFamily: "'Outfit',sans-serif",
+                        }}
+                      >
+                        {s === "lastDate" ? "Deadline" : "Vacancies"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div
+                  className="home-state-jobs-scroll"
+                  style={{
+                    flex: 1,
+                    minHeight: 0,
+                    overflowY: "auto",
+                    overflowX: "hidden",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 10,
+                    paddingRight: 6,
+                    WebkitOverflowScrolling: "touch",
+                  }}
+                >
+                  {filtered.length === 0 ? (
+                    <div
+                      style={{
+                        background: DS.bg1,
+                        border: `1px solid ${DS.border}`,
+                        borderRadius: 12,
+                        padding: "16px 14px",
+                        fontSize: 12.5,
+                        color: DS.mutedHi,
+                        fontFamily: "'Outfit',sans-serif",
+                        lineHeight: 1.55,
+                      }}
+                    >
+                      No state-specific listings in the sample data for this region. Use ✕ Clear on the map or pick All India in the state strip to return to the full homepage.
+                    </div>
+                  ) : (
+                    filtered.map((job) => <JobCard key={job.id} job={job} onClick={() => onJobClick(job)} />)
+                  )}
+                </div>
+              </>
             )}
-          </>
+          </div>
+        </div>
+
+        {!selectedState && (
+          <div style={{ marginTop: 32, paddingTop: 4, width: "100%" }}>
+            <CategoryGrid activeCat={activeCat} setActiveCat={setActiveCat} counts={categoryCounts} />
+          </div>
         )}
       </section>
+
+      {!selectedState && (
+        <section id="main-jobs" style={{ padding: "12px 20px 40px", maxWidth: 1240, margin: "0 auto" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+            <div>
+              <h2 style={{ fontSize: 16, fontWeight: 800, color: DS.white, fontFamily: "'Sora',sans-serif", margin: "0 0 3px" }}>
+                {activeCat ? `${CATS.find((c) => c.id === activeCat)?.name || ""} Jobs` : search ? "Search Results" : "Latest Government Jobs"}
+              </h2>
+              <p style={{ fontSize: 12, color: DS.muted, fontFamily: "'Outfit',sans-serif", margin: 0 }}>
+                {filtered.length} jobs · {filtered.reduce((s, j) => s + j.vacancies, 0).toLocaleString()} total vacancies
+              </p>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 11.5, color: DS.muted, fontFamily: "'Outfit',sans-serif" }}>Sort:</span>
+              {["lastDate", "vacancies"].map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setSort(s)}
+                  style={{
+                    background: sort === s ? "rgba(255,107,0,0.12)" : "transparent",
+                    border: `1px solid ${sort === s ? "rgba(255,107,0,0.35)" : DS.border}`,
+                    borderRadius: 8,
+                    padding: "5px 12px",
+                    fontSize: 11.5,
+                    color: sort === s ? DS.saffron : DS.muted,
+                    cursor: "pointer",
+                    fontFamily: "'Outfit',sans-serif",
+                  }}
+                >
+                  {s === "lastDate" ? "Deadline" : "Vacancies"}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {filtered.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "60px 0", color: DS.muted, fontFamily: "'Outfit',sans-serif" }}>
+              <div style={{ fontSize: 44, marginBottom: 12 }}>📭</div>
+              <div style={{ fontSize: 17, fontWeight: 600, marginBottom: 6, color: DS.mutedHi }}>No jobs found</div>
+              <div style={{ fontSize: 13 }}>Try removing filters or selecting a different state</div>
+            </div>
+          ) : (
+            <>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                {displayed.map((job) => (
+                  <JobCard key={job.id} job={job} onClick={() => onJobClick(job)} />
+                ))}
+              </div>
+              {!showAll && filtered.length > INITIAL_JOB_LIMIT && (
+                <div style={{ textAlign: "center", marginTop: 20 }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowAll(true)}
+                    style={{ background: DS.bg1, border: `1px solid rgba(255,107,0,0.35)`, borderRadius: 12, padding: "12px 32px", fontSize: 13, fontWeight: 600, color: DS.saffron, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}
+                  >
+                    Load More Jobs ({filtered.length - INITIAL_JOB_LIMIT} more) ↓
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </section>
+      )}
 
       <AlertSection />
       <Footer />

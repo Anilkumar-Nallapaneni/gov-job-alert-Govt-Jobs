@@ -15,6 +15,7 @@ export const IndiaMap: React.FC<IndiaMapProps> = ({
   stateData = [],
   onStateHover,
   onStateClick,
+  selectionSyncKey = null,
 }) => {
   const [svgContent, setSvgContent] = useState<string>("");
   const [hoverInfo, setHoverInfo] = useState<HoverInfo | null>(null);
@@ -73,6 +74,23 @@ export const IndiaMap: React.FC<IndiaMapProps> = ({
     return () => observer.disconnect();
   }, [svgContent, mapStyle, stateData]);
 
+  // Reset every path to the base palette when selection changes or clears (no “stuck” hover / no extra selected fill).
+  useEffect(() => {
+    if (!svgContent || !mapContainerRef.current) return;
+    const paths = mapContainerRef.current.querySelectorAll("path");
+    paths.forEach((path) => {
+      const pathElement = path as SVGPathElement;
+      const id = pathElement.getAttribute("id") || "";
+      const fillColor = stateColors[id] || mapStyle.backgroundColor || "#ffffff";
+      try {
+        pathElement.setAttribute("fill", fillColor);
+        originalColors.current.set(id, fillColor);
+      } catch {
+        /* ignore */
+      }
+    });
+  }, [selectionSyncKey, svgContent, mapStyle.backgroundColor]);
+
   const handleMouseEnter = (e: React.MouseEvent, element: SVGPathElement) => {
     const pathId = element.getAttribute("id") || "";
     const title = element.getAttribute("title") || element.getAttribute("data-name") || "";
@@ -130,7 +148,7 @@ export const IndiaMap: React.FC<IndiaMapProps> = ({
           {currentStateData?.customData && (
             <div className="state-tooltip-custom-data">
               {Object.entries(currentStateData.customData)
-                .filter(([key]) => key !== "name")
+                .filter(([key]) => key !== "name" && key !== "region")
                 .map(([key, value]) => (
                   <div key={key} className="state-tooltip-row">
                     <span>{key}:</span>
@@ -158,7 +176,10 @@ export const IndiaMap: React.FC<IndiaMapProps> = ({
         onClick={(e) => {
           const path = e.target as SVGPathElement;
           if (path.tagName === "path") {
-            onStateClick?.(path.getAttribute("id") || "");
+            const id = path.getAttribute("id") || "";
+            onStateClick?.(id);
+            const base = originalColors.current.get(id) || stateColors[id] || mapStyle.backgroundColor || "#ffffff";
+            path.setAttribute("fill", base);
           }
         }}
         onMouseOut={(e) => {
