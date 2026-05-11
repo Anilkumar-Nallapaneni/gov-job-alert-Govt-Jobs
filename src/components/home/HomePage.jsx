@@ -9,6 +9,7 @@ import CategoryGrid from "@/components/jobs/CategoryGrid";
 import JobCard from "@/components/jobs/JobCard";
 import AlertSection from "@/components/home/AlertSection";
 import Footer from "@/components/layout/Footer";
+import "./HomePage.css";
 
 const INITIAL_JOB_LIMIT = 8;
 const QUICK_FILTERS = ["10th Pass", "12th Pass", "Graduate", "Engineering", "Defence", "Banking", "Police"];
@@ -112,18 +113,6 @@ export default function HomePage({
 
   return (
     <div>
-      <style>{`
-        @media (max-width: 900px) {
-          .home-hero-grid { grid-template-columns: 1fr !important; }
-        }
-        .home-state-jobs-scroll::-webkit-scrollbar { width: 6px; }
-        .home-state-jobs-scroll::-webkit-scrollbar-track { background: transparent; }
-        .home-state-jobs-scroll::-webkit-scrollbar-thumb {
-          background: rgba(255, 107, 0, 0.35);
-          border-radius: 4px;
-        }
-      `}</style>
-
       {/* Row 1 — state strip only (under navbar) */}
       <div
         className="home-subheader"

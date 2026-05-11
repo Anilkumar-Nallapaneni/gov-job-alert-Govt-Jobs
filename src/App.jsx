@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { DS, applyColorMode } from "@/theme/designSystem";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { applyColorMode } from "@/theme/designSystem";
 import { STATES, toSvgStateId } from "@/data/states";
 import { ALL_JOBS } from "@/data/jobs";
 import { FEED_POOL } from "@/data/feed";
@@ -22,24 +22,29 @@ export default function App() {
   const [search, setSearch] = useState("");
   const [colorMode, setColorMode] = useState(() => {
     try {
-      return localStorage.getItem(COLOR_MODE_KEY) === "bw" ? "bw" : "dark";
+      const v = localStorage.getItem(COLOR_MODE_KEY);
+      if (v === "night") {
+        localStorage.setItem(COLOR_MODE_KEY, "dark");
+        return "dark";
+      }
+      return v === "bw" ? "bw" : "dark";
     } catch {
       return "dark";
     }
   });
 
   const onColorModeChange = useCallback((next) => {
-    applyColorMode(next);
-    document.documentElement.dataset.colorMode = next;
     try {
       localStorage.setItem(COLOR_MODE_KEY, next);
     } catch {
       /* ignore */
     }
+    // Apply before setState so the next paint uses updated `DS` (effects run after paint).
+    applyColorMode(next);
     setColorMode(next);
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.documentElement.dataset.colorMode = colorMode;
   }, [colorMode]);
 
@@ -90,19 +95,7 @@ export default function App() {
 
   return (
     <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800;900&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
-        *{box-sizing:border-box;margin:0;padding:0;}
-        html,body{background:${DS.bg0};color:${DS.white};}
-        ::-webkit-scrollbar{width:5px;height:5px;}
-        ::-webkit-scrollbar-track{background:${DS.bg0};}
-        ::-webkit-scrollbar-thumb{background:${DS.saffron};border-radius:3px;}
-        input::placeholder{color:${DS.muted}!important;}
-        a{color:inherit;}
-        @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
-        @keyframes slideIn{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
-      `}</style>
-      <div style={{ minHeight: "100vh", background: DS.bg0, fontFamily: "'Outfit',sans-serif", display: "flex", flexDirection: "column" }}>
+      <div className="app-shell">
         <Ticker feedItems={feedItems} />
         <Navbar
           view={view}

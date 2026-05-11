@@ -38,8 +38,8 @@ export default function Ticker({ feedItems }) {
   return (
     <div style={{ height: 32, background: DS.bg0, borderBottom: `1px solid ${DS.border}`, display: "flex", alignItems: "center", overflow: "hidden", flexShrink: 0 }}>
       <div style={{ background: DS.saffron, padding: "0 14px", height: "100%", display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-        <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#000", animation: "pulse 1s infinite" }} />
-        <span style={{ fontSize: 11, fontWeight: 700, color: "#000", fontFamily: "'JetBrains Mono',monospace", letterSpacing: 1 }}>LIVE</span>
+        <span style={{ width: 6, height: 6, borderRadius: "50%", background: DS.inkOnBrand, animation: "pulse 1s infinite" }} />
+        <span style={{ fontSize: 11, fontWeight: 700, color: DS.inkOnBrand, fontFamily: "'JetBrains Mono',monospace", letterSpacing: 1 }}>LIVE</span>
       </div>
       <div style={{ overflow: "hidden", flex: 1 }}>
         <div ref={ref} style={{ display: "flex", whiteSpace: "nowrap", willChange: "transform" }}>

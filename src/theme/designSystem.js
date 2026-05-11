@@ -35,9 +35,16 @@ const DARK = {
   switchKnobShadow: "0 0 8px rgba(255,107,0,0.35)",
   accentChipActiveBg: "rgba(255,107,0,0.15)",
   accentChipActiveBorder: "rgba(255,107,0,0.5)",
+  overlayScrim: "rgba(0,0,0,0.88)",
+  shadowCardHover: "0 10px 30px rgba(0,0,0,0.5)",
+  greenSoftBg: "rgba(34,197,94,0.12)",
+  greenSoftBorder: "rgba(34,197,94,0.3)",
+  redSoftBg: "rgba(239,68,68,0.12)",
+  redSoftBorder: "rgba(239,68,68,0.3)",
+  tableRowBorder: "rgba(19,29,46,0.6)",
 };
 
-/** Light monochrome — neutral grays, no orange. */
+/** Light monochrome — neutral grays, no orange (shown as “Light” in the UI). */
 const BW = {
   bg0: "#E8E9ED",
   bg1: "#FFFFFF",
@@ -72,15 +79,33 @@ const BW = {
   switchKnobShadow: "0 1px 3px rgba(0,0,0,0.2)",
   accentChipActiveBg: "rgba(20,22,30,0.1)",
   accentChipActiveBorder: "rgba(20,22,30,0.38)",
+  overlayScrim: "rgba(12,12,16,0.78)",
+  shadowCardHover: "0 12px 28px rgba(0,0,0,0.12)",
+  greenSoftBg: "rgba(61,61,68,0.14)",
+  greenSoftBorder: "rgba(61,61,68,0.35)",
+  redSoftBg: "rgba(42,42,46,0.14)",
+  redSoftBorder: "rgba(42,42,46,0.4)",
+  tableRowBorder: "rgba(184,186,196,0.65)",
 };
 
 let active = { ...DARK };
 
+/** Push current palette to `html` as `--ds-*` for CSS (see `src/styles/variables.css`). */
+export function syncDesignTokensToDom() {
+  if (typeof document === "undefined") return;
+  const root = document.documentElement;
+  for (const key of Object.keys(active)) {
+    const val = active[key];
+    if (val != null) root.style.setProperty(`--ds-${key}`, String(val));
+  }
+}
+
 /**
- * @param {"dark" | "bw"} mode
+ * @param {"dark" | "bw"} mode — `bw` is the light theme (stored key unchanged for compatibility).
  */
 export function applyColorMode(mode) {
   active = mode === "bw" ? { ...BW } : { ...DARK };
+  syncDesignTokensToDom();
 }
 
 export const DS = new Proxy(
@@ -91,6 +116,10 @@ export const DS = new Proxy(
     },
   }
 );
+
+if (typeof document !== "undefined") {
+  syncDesignTokensToDom();
+}
 
 export const REGION_FILLS = {
   north: { base: "#0A1E3C", hover: "#142E55", border: "#163258" },

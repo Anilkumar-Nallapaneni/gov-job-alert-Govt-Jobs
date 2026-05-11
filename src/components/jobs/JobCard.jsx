@@ -24,7 +24,7 @@ export default function JobCard({ job, onClick }) {
         cursor: "pointer",
         transition: "all 0.17s ease",
         transform: hov ? "translateY(-2px)" : "none",
-        boxShadow: hov ? "0 10px 30px rgba(0,0,0,0.5)" : "none",
+        boxShadow: hov ? DS.shadowCardHover : "none",
         position: "relative",
         overflow: "hidden",
       }}
@@ -37,10 +37,34 @@ export default function JobCard({ job, onClick }) {
               {job.category.toUpperCase()}
             </span>
             {job.status === "new" && (
-              <span style={{ fontSize: 9.5, fontWeight: 700, padding: "2px 8px", borderRadius: 20, background: "rgba(34,197,94,0.12)", color: "#22C55E", border: "1px solid rgba(34,197,94,0.3)" }}>NEW</span>
+              <span
+                style={{
+                  fontSize: 9.5,
+                  fontWeight: 700,
+                  padding: "2px 8px",
+                  borderRadius: 20,
+                  background: DS.greenSoftBg,
+                  color: DS.green,
+                  border: `1px solid ${DS.greenSoftBorder}`,
+                }}
+              >
+                NEW
+              </span>
             )}
             {job.status === "hot" && (
-              <span style={{ fontSize: 9.5, fontWeight: 700, padding: "2px 8px", borderRadius: 20, background: "rgba(239,68,68,0.12)", color: "#EF4444", border: "1px solid rgba(239,68,68,0.3)" }}>🔥 HOT</span>
+              <span
+                style={{
+                  fontSize: 9.5,
+                  fontWeight: 700,
+                  padding: "2px 8px",
+                  borderRadius: 20,
+                  background: DS.redSoftBg,
+                  color: DS.red,
+                  border: `1px solid ${DS.redSoftBorder}`,
+                }}
+              >
+                🔥 HOT
+              </span>
             )}
           </div>
           <div style={{ fontSize: 14, fontWeight: 700, color: DS.white, fontFamily: "'Sora',sans-serif", lineHeight: 1.35, marginBottom: 3 }}>{job.title}</div>
@@ -67,17 +91,25 @@ export default function JobCard({ job, onClick }) {
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: `1px solid ${DS.border}`, paddingTop: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ fontSize: 11, color: isUrgent ? "#EF4444" : isExp ? "#3D5068" : DS.muted }}>
+          <span style={{ fontSize: 11, color: isUrgent ? DS.red : isExp ? DS.muted : DS.muted }}>
             {isExp ? "❌ Expired" : isUrgent ? "⚠️" : ""}
             {!isExp && ` Last: ${new Date(job.lastDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}`}
           </span>
           {!isExp && daysLeft <= 30 && (
-            <span style={{ fontSize: 9.5, padding: "1px 6px", borderRadius: 5, background: isUrgent ? "rgba(239,68,68,0.12)" : DS.bg3, color: isUrgent ? "#EF4444" : DS.muted }}>
+            <span
+              style={{
+                fontSize: 9.5,
+                padding: "1px 6px",
+                borderRadius: 5,
+                background: isUrgent ? DS.redSoftBg : DS.bg3,
+                color: isUrgent ? DS.red : DS.muted,
+              }}
+            >
               {daysLeft}d
             </span>
           )}
         </div>
-        <span style={{ fontSize: 11, fontWeight: 700, color: hov ? "#FF8C35" : DS.saffron, fontFamily: "'Outfit',sans-serif" }}>View Details →</span>
+        <span style={{ fontSize: 11, fontWeight: 700, color: hov ? DS.saffronHi : DS.saffron, fontFamily: "'Outfit',sans-serif" }}>View Details →</span>
       </div>
     </div>
   );

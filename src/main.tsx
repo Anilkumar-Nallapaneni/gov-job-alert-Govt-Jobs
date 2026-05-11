@@ -6,7 +6,10 @@ import { applyColorMode } from './theme/designSystem'
 import './styles/global.css'
 
 try {
-  if (localStorage.getItem('bharatnaukri-color-mode') === 'bw') applyColorMode('bw')
+  const key = 'bharatnaukri-color-mode'
+  const m = localStorage.getItem(key)
+  if (m === 'night') localStorage.setItem(key, 'dark')
+  if (localStorage.getItem(key) === 'bw') applyColorMode('bw')
 } catch {
   /* private mode */
 }

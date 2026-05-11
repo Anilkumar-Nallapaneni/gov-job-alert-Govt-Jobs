@@ -1,7 +1,11 @@
 import { STATES } from "./states";
+import { enrichJobPosts } from "./categoryVacancySplit";
 
-/* All government jobs displayed across the portal. */
-export const ALL_JOBS = [
+/* All government jobs displayed across the portal.
+ * Each `posts[]` item may include `categoryVacancies`: an object mapping category labels
+ * (UR, OBC, SC, ST, EWS, etc. — as in the official PDF) to post counts for that row.
+ */
+const ALL_JOBS_RAW = [
   {id:1,slug:"upsc-cse-2025",title:"UPSC Civil Services Examination 2025",dept:"Union Public Service Commission",
    state:"All India",stateIds:STATES.map(s=>s.id),category:"upsc",vacancies:1056,qual:"Graduate",
    lastDate:"2025-06-16",applyStart:"2025-02-01",salary:"₹56,100–₹2,50,000",age:"21–32",type:"Group A",
@@ -188,7 +192,10 @@ export const ALL_JOBS = [
    fee:{General:"₹550 (both)/₹300 (one)",OBC:"₹490/₹270","SC/ST":"₹390/₹220",Female:"₹390/₹220",Mode:"E-Mitra / Net Banking / UPI"},
    ageRelax:"No upper age limit for eligible Rajasthan residents",
    nationality:"Indian Citizen with Rajasthan domicile",attempts:"No limit",
-   posts:[{post:"Level I – Primary Teacher (Class 1–5)",vacancies:18000,pay:"Level 5–7"},{post:"Level II – Upper Primary Teacher (Class 6–8)",vacancies:14000,pay:"Level 7–10"}],
+   posts:[
+     {post:"Level I – Primary Teacher (Class 1–5)",vacancies:18000,pay:"Level 5–7",categoryVacancies:{"General (UR)":7200,"OBC":4860,"SC":2880,"ST":1800,"EWS":1260}},
+     {post:"Level II – Upper Primary Teacher (Class 6–8)",vacancies:14000,pay:"Level 7–10",categoryVacancies:{"General (UR)":5600,"OBC":3780,"SC":2240,"ST":1400,"EWS":980}},
+   ],
    selection:["Written Exam Only (150 MCQ, 150 marks, 2.5 hrs)","Validity: Lifetime (Rajasthan Govt order 2022)"],
    howApply:["Visit reetbser2025.in","Click New Registration","Enter personal & educational details","Choose Level I / Level II (or both)","Upload photo & signature","Pay fee via E-Mitra or online","Print application"],
    helpdesk:"0145-2420580",email:"reet@rajeduboard.rajasthan.gov.in",
@@ -322,3 +329,9 @@ export const ALL_JOBS = [
    helpdesk:"022-22821422",email:"mpschelpdesk@gmail.com",
    syllabus:"Prelims: Marathi+English (60) + GS (100). Mains: Marathi, English, GS, Subject papers",isLive:false},
 ];
+
+/** Every post gets `categoryVacancies` (from data or auto-split summing to post vacancies). */
+export const ALL_JOBS = ALL_JOBS_RAW.map((job) => ({
+  ...job,
+  posts: enrichJobPosts(job.posts),
+}));

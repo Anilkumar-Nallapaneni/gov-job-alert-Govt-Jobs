@@ -27,7 +27,7 @@ export default function Footer() {
             <p style={{ fontSize: 12.5, color: DS.muted, fontFamily: "'Outfit',sans-serif", lineHeight: 1.7, marginBottom: 12 }}>
               India's most comprehensive government job portal. Real-time alerts, verified listings, all 28 states.
             </p>
-            <div style={{ fontSize: 11, color: "#1A2535", fontFamily: "'Outfit',sans-serif", background: DS.bg2, border: `1px solid ${DS.border}`, borderRadius: 8, padding: "10px 12px", lineHeight: 1.6 }}>
+            <div style={{ fontSize: 11, color: DS.mutedHi, fontFamily: "'Outfit',sans-serif", background: DS.bg2, border: `1px solid ${DS.border}`, borderRadius: 8, padding: "10px 12px", lineHeight: 1.6 }}>
               ⚠️ Disclaimer: Independent aggregator. Not affiliated with any government body. Verify at official sites.
             </div>
           </div>

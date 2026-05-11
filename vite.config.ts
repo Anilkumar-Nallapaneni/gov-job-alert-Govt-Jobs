@@ -5,6 +5,10 @@ import { resolve } from 'path'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  build: {
+    /** Avoid stale hashed chunks (e.g. old CSS with broken minified `@import"…"`). */
+    emptyOutDir: true,
+  },
   resolve: {
     alias: [
       { find: '@', replacement: resolve(__dirname, 'src') },

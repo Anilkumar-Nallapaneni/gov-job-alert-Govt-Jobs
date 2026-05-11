@@ -1,7 +1,14 @@
+import { Fragment } from "react";
 import { DS } from "@/theme/designSystem";
 import { CATS } from "@/data/categories";
 
 const DAY_MS = 1000 * 60 * 60 * 24;
+
+/** Sum category-wise counts; used to cross-check with post total. */
+function sumCategoryVacancies(categoryVacancies) {
+  if (!categoryVacancies || typeof categoryVacancies !== "object") return 0;
+  return Object.values(categoryVacancies).reduce((a, n) => a + (Number(n) || 0), 0);
+}
 
 function Section({ title, children }) {
   return (
@@ -21,7 +28,7 @@ export default function JobDetail({ job, onClose }) {
 
   return (
     <div
-      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.88)", zIndex: 500, overflow: "auto", backdropFilter: "blur(4px)" }}
+      style={{ position: "fixed", inset: 0, background: DS.overlayScrim, zIndex: 500, overflow: "auto", backdropFilter: "blur(4px)" }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -39,10 +46,32 @@ export default function JobDetail({ job, onClose }) {
             <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: `${catColor}18`, color: catColor, border: `1px solid ${catColor}40` }}>{job.category.toUpperCase()}</span>
             <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: DS.bg3, color: DS.mutedHi, border: `1px solid ${DS.borderHi}` }}>{job.type}</span>
             {job.status === "hot" && (
-              <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: "rgba(239,68,68,0.12)", color: "#EF4444", border: "1px solid rgba(239,68,68,0.3)" }}>🔥 HOT</span>
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  padding: "3px 10px",
+                  borderRadius: 20,
+                  background: DS.redSoftBg,
+                  color: DS.red,
+                  border: `1px solid ${DS.redSoftBorder}`,
+                }}
+              >
+                🔥 HOT
+              </span>
             )}
             {isUrgent && (
-              <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: "rgba(239,68,68,0.12)", color: "#EF4444", border: "1px solid rgba(239,68,68,0.3)" }}>
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  padding: "3px 10px",
+                  borderRadius: 20,
+                  background: DS.redSoftBg,
+                  color: DS.red,
+                  border: `1px solid ${DS.redSoftBorder}`,
+                }}
+              >
                 ⚠️ Closing in {daysLeft} days!
               </span>
             )}
@@ -112,6 +141,9 @@ export default function JobDetail({ job, onClose }) {
 
         {job.posts?.length > 0 && (
           <Section title="Post-wise Vacancy Details">
+            <p style={{ fontSize: 11, color: DS.muted, margin: "0 0 12px", fontFamily: "'Outfit',sans-serif", lineHeight: 1.5 }}>
+              Total posts per post name; where the official notification gives a <strong style={{ color: DS.mutedHi }}>category / reservation-wise</strong> break-up, it is shown below each row (as in the advertisement annexure).
+            </p>
             <div style={{ overflowX: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                 <thead>
@@ -122,13 +154,54 @@ export default function JobDetail({ job, onClose }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {job.posts.map((p, i) => (
-                    <tr key={i} style={{ borderBottom: `1px solid rgba(19,29,46,0.6)` }}>
-                      <td style={{ padding: "9px 8px", color: DS.mutedHi, fontFamily: "'Outfit',sans-serif" }}>{p.post}</td>
-                      <td style={{ padding: "9px 8px", textAlign: "right", color: DS.saffron, fontFamily: "'JetBrains Mono',monospace", fontWeight: 700 }}>{(p.vacancies || 0).toLocaleString()}</td>
-                      <td style={{ padding: "9px 8px", textAlign: "right", color: DS.muted, fontSize: 11 }}>{p.pay}</td>
-                    </tr>
-                  ))}
+                  {job.posts.map((p, i) => {
+                    const cat = p.categoryVacancies;
+                    const catSum = sumCategoryVacancies(cat);
+                    const showCat = cat && typeof cat === "object" && Object.keys(cat).length > 0;
+                    return (
+                      <Fragment key={`post-${p.post || i}`}>
+                        <tr style={{ borderBottom: showCat ? "none" : `1px solid ${DS.tableRowBorder}` }}>
+                          <td style={{ padding: "9px 8px", color: DS.mutedHi, fontFamily: "'Outfit',sans-serif", verticalAlign: "top" }}>{p.post}</td>
+                          <td style={{ padding: "9px 8px", textAlign: "right", color: DS.saffron, fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, verticalAlign: "top" }}>{(p.vacancies || 0).toLocaleString()}</td>
+                          <td style={{ padding: "9px 8px", textAlign: "right", color: DS.muted, fontSize: 11, verticalAlign: "top" }}>{p.pay}</td>
+                        </tr>
+                        {showCat && (
+                          <tr style={{ borderBottom: `1px solid ${DS.tableRowBorder}` }}>
+                            <td colSpan={3} style={{ padding: "0 8px 12px 16px", background: DS.bg0 }}>
+                              <div style={{ fontSize: 10, fontWeight: 700, color: DS.saffron, letterSpacing: 0.8, marginBottom: 8, fontFamily: "'Outfit',sans-serif", textTransform: "uppercase" }}>
+                                Category-wise vacancies (as per notification)
+                              </div>
+                              <table style={{ width: "100%", maxWidth: 420, borderCollapse: "collapse", fontSize: 11 }}>
+                                <thead>
+                                  <tr>
+                                    <th style={{ textAlign: "left", padding: "5px 8px", color: DS.muted, fontWeight: 600, borderBottom: `1px solid ${DS.border}`, fontFamily: "'Outfit',sans-serif" }}>Category</th>
+                                    <th style={{ textAlign: "right", padding: "5px 8px", color: DS.muted, fontWeight: 600, borderBottom: `1px solid ${DS.border}`, fontFamily: "'Outfit',sans-serif" }}>Posts</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {Object.entries(cat).map(([label, n]) => (
+                                    <tr key={label}>
+                                      <td style={{ padding: "6px 8px", color: DS.mutedHi, fontFamily: "'Outfit',sans-serif", borderBottom: `1px solid ${DS.tableRowBorder}` }}>{label}</td>
+                                      <td style={{ padding: "6px 8px", textAlign: "right", color: DS.white, fontFamily: "'JetBrains Mono',monospace", fontWeight: 600, borderBottom: `1px solid ${DS.tableRowBorder}` }}>{Number(n).toLocaleString()}</td>
+                                    </tr>
+                                  ))}
+                                  <tr>
+                                    <td style={{ padding: "7px 8px", color: DS.muted, fontFamily: "'Outfit',sans-serif", fontWeight: 600 }}>Total (category-wise)</td>
+                                    <td style={{ padding: "7px 8px", textAlign: "right", color: DS.saffron, fontFamily: "'JetBrains Mono',monospace", fontWeight: 700 }}>{catSum.toLocaleString()}</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                              {catSum !== (p.vacancies || 0) && (
+                                <div style={{ fontSize: 10, color: DS.muted, marginTop: 6, fontFamily: "'Outfit',sans-serif" }}>
+                                  Note: Category total ({catSum.toLocaleString()}) differs from post total ({(p.vacancies || 0).toLocaleString()}) — align figures with the official PDF.
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

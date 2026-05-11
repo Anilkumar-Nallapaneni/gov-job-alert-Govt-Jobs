@@ -5,7 +5,7 @@ const NAV_ITEMS = ["Home", "Jobs", "Results", "Admit Card", "Alert"];
 const toViewId = (label) => label.toLowerCase().replace(" ", "-");
 
 export default function Navbar({ view, setView, search, setSearch, onSearch, colorMode = "dark", onColorModeChange }) {
-  const isBw = colorMode === "bw";
+  const isLight = colorMode === "bw";
 
   return (
     <nav
@@ -91,14 +91,14 @@ export default function Navbar({ view, setView, search, setSearch, onSearch, col
       </div>
 
       {typeof onColorModeChange === "function" && (
-        <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }} title="Theme">
+        <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }} title="Dark or light theme">
           <span style={{ fontSize: 10, fontWeight: 600, color: DS.muted, fontFamily: "'Outfit',sans-serif", letterSpacing: 0.2 }}>Dark</span>
           <button
             type="button"
             role="switch"
-            aria-checked={isBw}
-            aria-label={isBw ? "Use dark theme" : "Use black and white theme"}
-            onClick={() => onColorModeChange(isBw ? "dark" : "bw")}
+            aria-checked={isLight}
+            aria-label={isLight ? "Switch to dark theme" : "Switch to light theme"}
+            onClick={() => onColorModeChange(isLight ? "dark" : "bw")}
             style={{
               width: 46,
               height: 24,
@@ -121,13 +121,13 @@ export default function Navbar({ view, setView, search, setSearch, onSearch, col
                 borderRadius: "50%",
                 background: DS.gradientBrand,
                 boxShadow: DS.switchKnobShadow,
-                transform: isBw ? "translateX(22px)" : "translateX(0)",
-                transition: "transform 0.14s cubic-bezier(0.4, 0, 0.2, 1)",
+                transform: isLight ? "translateX(22px)" : "translateX(0)",
+                transition: "transform 0.09s cubic-bezier(0.33, 1, 0.68, 1)",
                 willChange: "transform",
               }}
             />
           </button>
-          <span style={{ fontSize: 10, fontWeight: 600, color: DS.muted, fontFamily: "'Outfit',sans-serif", letterSpacing: 0.2 }}>B&amp;W</span>
+          <span style={{ fontSize: 10, fontWeight: 600, color: DS.muted, fontFamily: "'Outfit',sans-serif", letterSpacing: 0.2 }}>Light</span>
         </div>
       )}
 

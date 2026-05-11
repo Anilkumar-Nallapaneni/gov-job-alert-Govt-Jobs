@@ -6,10 +6,8 @@ const CHANNELS = ["Email", "WhatsApp", "Telegram", "Push"];
 export default function AlertSection() {
   const [email, setEmail] = useState("");
   const [sub, setSub] = useState(false);
-  const [channels, setChannels] = useState(["Email"]);
-
-  const toggleCh = (c) =>
-    setChannels((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
+  /** Single channel at a time (radio-style) — clearer than multi-select for this UI. */
+  const [channel, setChannel] = useState("Email");
 
   return (
     <div style={{ padding: "40px 20px", background: DS.bg0, borderTop: `1px solid ${DS.border}` }}>
@@ -22,24 +20,28 @@ export default function AlertSection() {
             Instant alerts when new vacancies open. Customised by state, category, and qualification level.
           </p>
 
-          <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 18, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 18, flexWrap: "wrap" }} role="radiogroup" aria-label="Alert channel">
             {CHANNELS.map((c) => {
-              const active = channels.includes(c);
+              const active = channel === c;
               return (
                 <button
                   key={c}
-                  onClick={() => toggleCh(c)}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  onClick={() => setChannel(c)}
                   style={{
-                    background: active ? DS.accentChipActiveBg : DS.bg2,
-                    border: `1px solid ${active ? DS.accentChipActiveBorder : DS.borderHi}`,
+                    background: active ? DS.accentChipActiveBg : DS.bg1,
+                    border: `1px solid ${active ? DS.accentChipActiveBorder : DS.border}`,
                     borderRadius: 10,
                     padding: "7px 16px",
                     fontSize: 12.5,
-                    fontWeight: active ? 700 : 400,
-                    color: active ? DS.saffron : DS.mutedHi,
+                    fontWeight: active ? 700 : 500,
+                    color: active ? DS.saffron : DS.muted,
                     cursor: "pointer",
                     fontFamily: "'Outfit',sans-serif",
-                    transition: "all 0.12s",
+                    transition: "background 0.12s, border-color 0.12s, color 0.12s",
+                    boxShadow: active ? `0 0 0 1px ${DS.accentBorderLo}` : "none",
                   }}
                 >
                   {c}
@@ -49,8 +51,9 @@ export default function AlertSection() {
           </div>
 
           {sub ? (
-            <p style={{ color: "#22C55E", fontSize: 14, fontFamily: "'Outfit',sans-serif", padding: "14px 0" }}>
-              ✅ You're subscribed! Alerts will arrive on {channels.join(", ")}.
+            <p style={{ color: DS.green, fontSize: 14, fontFamily: "'Outfit',sans-serif", padding: "14px 0" }}>
+              {"✅ You're subscribed! Alerts will arrive on "}
+              <strong style={{ color: DS.white }}>{channel}</strong>.
             </p>
           ) : (
             <div style={{ display: "flex", gap: 10, maxWidth: 460, margin: "0 auto" }}>
