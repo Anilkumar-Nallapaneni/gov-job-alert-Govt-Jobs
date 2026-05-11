@@ -54,15 +54,15 @@ export default function HomePage({
 }) {
   const [sort, setSort] = useState("lastDate");
   const [showAll, setShowAll] = useState(false);
-  /** Quick pills when a state is selected — filters scroll list only. */
-  const [stateQuickFilter, setStateQuickFilter] = useState(null);
+  /** Quick qualification / sector pills — filter job list (All India or state). */
+  const [quickFilter, setQuickFilter] = useState(null);
 
   useEffect(() => {
     setShowAll(false);
-  }, [selectedState, activeCat, search]);
+  }, [selectedState, activeCat, search, quickFilter]);
 
   useEffect(() => {
-    setStateQuickFilter(null);
+    setQuickFilter(null);
   }, [selectedState]);
 
   const filtered = useMemo(() => {
@@ -91,15 +91,15 @@ export default function HomePage({
 
     if (activeCat) j = j.filter((x) => x.category === activeCat);
 
-    if (selectedState && stateQuickFilter) {
-      j = j.filter((x) => jobMatchesQuickFilter(x, stateQuickFilter));
+    if (quickFilter) {
+      j = j.filter((x) => jobMatchesQuickFilter(x, quickFilter));
     }
 
     if (sort === "vacancies") j.sort((a, b) => b.vacancies - a.vacancies);
     else if (sort === "lastDate") j.sort((a, b) => new Date(a.lastDate) - new Date(b.lastDate));
 
     return j;
-  }, [selectedState, activeCat, sort, search, stateQuickFilter]);
+  }, [selectedState, activeCat, sort, search, quickFilter]);
 
   const displayed = showAll ? filtered : filtered.slice(0, INITIAL_JOB_LIMIT);
   const totalVac = ALL_JOBS.reduce((s, j) => s + j.vacancies, 0);
@@ -129,7 +129,7 @@ export default function HomePage({
         className="home-subheader"
         style={{
           borderBottom: `1px solid ${DS.border}`,
-          background: "rgba(3,6,13,0.98)",
+          background: DS.sheetBg,
           backdropFilter: "blur(10px)",
         }}
       >
@@ -163,7 +163,7 @@ export default function HomePage({
               width: "100%",
             }}
           >
-            <div style={{ height: 2, width: 28, background: "linear-gradient(to right,#FF6B00,#FFAA00)", flexShrink: 0 }} />
+            <div style={{ height: 2, width: 28, background: DS.gradientRule, flexShrink: 0 }} />
             <span style={{ fontSize: 11, fontWeight: 700, color: DS.saffron, letterSpacing: 3, fontFamily: "monospace" }}>
               {"INDIA'S #1 GOVT JOBS PORTAL"}
             </span>
@@ -184,15 +184,15 @@ export default function HomePage({
             </div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
               {QUICK_FILTERS.map((f) => {
-                const on = stateQuickFilter === f;
+                const on = quickFilter === f;
                 return (
                   <button
                     key={f}
                     type="button"
-                    onClick={() => setStateQuickFilter((prev) => (prev === f ? null : f))}
+                    onClick={() => setQuickFilter((prev) => (prev === f ? null : f))}
                     style={{
-                      background: on ? "rgba(255,107,0,0.12)" : DS.bg2,
-                      border: `1px solid ${on ? "rgba(255,107,0,0.45)" : DS.border}`,
+                      background: on ? DS.accentSoft : DS.bg2,
+                      border: `1px solid ${on ? DS.accentBorderHi : DS.border}`,
                       borderRadius: 20,
                       padding: "5px 13px",
                       fontSize: 11.5,
@@ -240,7 +240,7 @@ export default function HomePage({
               </div>
 
               {selectedState && (
-                <div style={{ background: "linear-gradient(135deg,#1A0E00,#0A1228)", border: `1px solid rgba(255,107,0,0.35)`, borderRadius: 12, padding: "10px 14px", marginBottom: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ background: DS.panelWarm, border: `1px solid ${DS.accentBorder}`, borderRadius: 12, padding: "10px 14px", marginBottom: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <div>
                     <div style={{ fontSize: 12, color: DS.saffron, fontWeight: 600, marginBottom: 2 }}>📍 {stateName}</div>
                     <div style={{ fontSize: 10.5, color: DS.muted }}>Region: {STATES.find((s) => s.id === selectedState)?.reg}</div>
@@ -283,49 +283,112 @@ export default function HomePage({
           >
             {!selectedState ? (
               <>
-                <h1 style={{ fontSize: 44, fontWeight: 900, color: DS.white, fontFamily: "'Sora',sans-serif", lineHeight: 1.05, marginBottom: 10, letterSpacing: 0.5 }}>
-                  FIND YOUR<br />
-                  <span style={{ WebkitTextStroke: "2px #FF6B00", WebkitTextFillColor: "transparent" }}>SARKARI</span>
-                  <br />
-                  <span style={{ color: DS.saffron }}>NAUKRI</span>
-                </h1>
-                <p style={{ fontSize: 14.5, color: DS.mutedHi, marginBottom: 24, lineHeight: 1.65, maxWidth: 440, fontFamily: "'Outfit',sans-serif" }}>
-                  Real-time government job alerts from UPSC, SSC, Railways, Banking, Police & more. {totalVac.toLocaleString()} active vacancies across all 28 states.
-                </p>
+                <header style={{ marginBottom: 16, width: "100%" }}>
+                  <h1
+                    id="dream-job-heading"
+                    style={{
+                      fontSize: "clamp(24px, 3.4vw, 34px)",
+                      fontWeight: 900,
+                      color: DS.white,
+                      fontFamily: "'Sora',sans-serif",
+                      lineHeight: 1.12,
+                      marginBottom: 10,
+                      letterSpacing: 0.3,
+                    }}
+                  >
+                    Find your <span style={{ color: DS.saffron }}>dream job</span>
+                  </h1>
+                  <p
+                    style={{
+                      fontSize: 14,
+                      color: DS.mutedHi,
+                      lineHeight: 1.65,
+                      maxWidth: "none",
+                      fontFamily: "'Outfit',sans-serif",
+                      margin: 0,
+                    }}
+                  >
+                    Real-time government job alerts from UPSC, SSC, Railways, Banking, Police & more. {totalVac.toLocaleString()} active vacancies across all 28 states.
+                  </p>
+                </header>
 
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10, marginBottom: 20 }}>
-                  {[
-                    { v: totalVac.toLocaleString(), l: "Active Vacancies", i: "📋" },
-                    { v: `${ALL_JOBS.filter((j) => j.status).length}`, l: "Hot/New Today", i: "🔥" },
-                    { v: "28", l: "States Covered", i: "🗺️" },
-                    { v: "10L+", l: "Monthly Users", i: "👥" },
-                  ].map(({ v, l, i }) => (
-                    <div key={l} style={{ background: DS.bg1, border: `1px solid ${DS.border}`, borderRadius: 12, padding: "12px 10px", textAlign: "center" }}>
-                      <div style={{ fontSize: 16, marginBottom: 4 }}>{i}</div>
-                      <div style={{ fontSize: 17, fontWeight: 800, color: DS.saffron, fontFamily: "'JetBrains Mono',monospace", lineHeight: 1 }}>{v}</div>
-                      <div style={{ fontSize: 9.5, color: DS.muted, marginTop: 4, fontFamily: "'Outfit',sans-serif" }}>{l}</div>
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10, marginBottom: 10 }}>
+                    {[
+                      { v: totalVac.toLocaleString(), l: "Active Vacancies", i: "📋" },
+                      { v: `${ALL_JOBS.filter((j) => j.status).length}`, l: "Hot/New Today", i: "🔥" },
+                      { v: "28", l: "States Covered", i: "🗺️" },
+                      { v: "10L+", l: "Monthly Users", i: "👥" },
+                    ].map(({ v, l, i }) => (
+                      <div key={l} style={{ background: DS.bg1, border: `1px solid ${DS.border}`, borderRadius: 12, padding: "12px 10px", textAlign: "center" }}>
+                        <div style={{ fontSize: 16, marginBottom: 4 }}>{i}</div>
+                        <div style={{ fontSize: 17, fontWeight: 800, color: DS.saffron, fontFamily: "'JetBrains Mono',monospace", lineHeight: 1 }}>{v}</div>
+                        <div style={{ fontSize: 9.5, color: DS.muted, marginTop: 4, fontFamily: "'Outfit',sans-serif" }}>{l}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div
+                    style={{
+                      background: DS.bg1,
+                      border: `1px solid ${DS.border}`,
+                      borderRadius: 12,
+                      padding: "12px 14px 14px",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10, gap: 12 }}>
+                      <h2 style={{ fontSize: 13, fontWeight: 800, color: DS.white, fontFamily: "'Sora',sans-serif", margin: 0, letterSpacing: 0.2 }}>Browse by Education</h2>
+                      {quickFilter && (
+                        <button
+                          type="button"
+                          onClick={() => setQuickFilter(null)}
+                          style={{
+                            background: "transparent",
+                            border: `1px solid ${DS.borderHi}`,
+                            borderRadius: 8,
+                            padding: "4px 10px",
+                            fontSize: 10.5,
+                            color: DS.mutedHi,
+                            cursor: "pointer",
+                            fontFamily: "'Outfit',sans-serif",
+                            flexShrink: 0,
+                          }}
+                        >
+                          Clear filter
+                        </button>
+                      )}
                     </div>
-                  ))}
-                </div>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                      {QUICK_FILTERS.map((f) => {
+                        const on = quickFilter === f;
+                        return (
+                          <button
+                            key={f}
+                            type="button"
+                            onClick={() => setQuickFilter((prev) => (prev === f ? null : f))}
+                            style={{
+                              background: on ? DS.accentSoft : DS.bg2,
+                              border: `1px solid ${on ? DS.accentBorderHi : DS.border}`,
+                              borderRadius: 20,
+                              padding: "6px 14px",
+                              fontSize: 11.5,
+                              color: on ? DS.saffron : DS.mutedHi,
+                              fontWeight: on ? 700 : 500,
+                              cursor: "pointer",
+                              fontFamily: "'Outfit',sans-serif",
+                              transition: "background 0.12s, border-color 0.12s, color 0.12s",
+                            }}
+                          >
+                            {f}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
 
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  {QUICK_FILTERS.map((f) => (
-                    <button
-                      key={f}
-                      type="button"
-                      style={{ background: DS.bg2, border: `1px solid ${DS.border}`, borderRadius: 20, padding: "5px 13px", fontSize: 11.5, color: DS.muted, cursor: "pointer", fontFamily: "'Outfit',sans-serif", transition: "all 0.12s" }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.border = `1px solid rgba(255,107,0,0.4)`;
-                        e.currentTarget.style.color = DS.saffron;
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.border = `1px solid ${DS.border}`;
-                        e.currentTarget.style.color = DS.muted;
-                      }}
-                    >
-                      {f}
-                    </button>
-                  ))}
+                  <div style={{ marginTop: 10 }}>
+                    <CategoryGrid activeCat={activeCat} setActiveCat={setActiveCat} counts={categoryCounts} />
+                  </div>
                 </div>
               </>
             ) : (
@@ -336,7 +399,7 @@ export default function HomePage({
                 <p style={{ fontSize: 12, color: DS.muted, fontFamily: "'Outfit',sans-serif", margin: "0 0 12px", flexShrink: 0 }}>
                   {filtered.length} listing{filtered.length !== 1 ? "s" : ""} ·{" "}
                   {filtered.reduce((s, j) => s + j.vacancies, 0).toLocaleString()} vacancies
-                  {stateQuickFilter ? ` · ${stateQuickFilter}` : ""}
+                  {quickFilter ? ` · ${quickFilter}` : ""}
                 </p>
                 <div
                   style={{
@@ -357,8 +420,8 @@ export default function HomePage({
                         type="button"
                         onClick={() => setSort(s)}
                         style={{
-                          background: sort === s ? "rgba(255,107,0,0.12)" : "transparent",
-                          border: `1px solid ${sort === s ? "rgba(255,107,0,0.35)" : DS.border}`,
+                          background: sort === s ? DS.accentSoft : "transparent",
+                          border: `1px solid ${sort === s ? DS.accentBorder : DS.border}`,
                           borderRadius: 8,
                           padding: "5px 12px",
                           fontSize: 11.5,
@@ -409,12 +472,6 @@ export default function HomePage({
             )}
           </div>
         </div>
-
-        {!selectedState && (
-          <div style={{ marginTop: 32, paddingTop: 4, width: "100%" }}>
-            <CategoryGrid activeCat={activeCat} setActiveCat={setActiveCat} counts={categoryCounts} />
-          </div>
-        )}
       </section>
 
       {!selectedState && (
@@ -426,6 +483,7 @@ export default function HomePage({
               </h2>
               <p style={{ fontSize: 12, color: DS.muted, fontFamily: "'Outfit',sans-serif", margin: 0 }}>
                 {filtered.length} jobs · {filtered.reduce((s, j) => s + j.vacancies, 0).toLocaleString()} total vacancies
+                {quickFilter ? ` · ${quickFilter}` : ""}
               </p>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -436,8 +494,8 @@ export default function HomePage({
                   type="button"
                   onClick={() => setSort(s)}
                   style={{
-                    background: sort === s ? "rgba(255,107,0,0.12)" : "transparent",
-                    border: `1px solid ${sort === s ? "rgba(255,107,0,0.35)" : DS.border}`,
+                    background: sort === s ? DS.accentSoft : "transparent",
+                    border: `1px solid ${sort === s ? DS.accentBorder : DS.border}`,
                     borderRadius: 8,
                     padding: "5px 12px",
                     fontSize: 11.5,
@@ -470,7 +528,7 @@ export default function HomePage({
                   <button
                     type="button"
                     onClick={() => setShowAll(true)}
-                    style={{ background: DS.bg1, border: `1px solid rgba(255,107,0,0.35)`, borderRadius: 12, padding: "12px 32px", fontSize: 13, fontWeight: 600, color: DS.saffron, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}
+                    style={{ background: DS.bg1, border: `1px solid ${DS.accentBorder}`, borderRadius: 12, padding: "12px 32px", fontSize: 13, fontWeight: 600, color: DS.saffron, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}
                   >
                     Load More Jobs ({filtered.length - INITIAL_JOB_LIMIT} more) ↓
                   </button>

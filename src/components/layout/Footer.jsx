@@ -11,12 +11,12 @@ const SOCIAL_LINKS = ["Telegram", "YouTube", "X", "Instagram"];
 
 export default function Footer() {
   return (
-    <footer style={{ background: "#020508", borderTop: `1px solid ${DS.border}`, padding: "36px 20px 18px" }}>
+    <footer style={{ background: DS.bg0, borderTop: `1px solid ${DS.border}`, padding: "36px 20px 18px" }}>
       <div style={{ maxWidth: 1240, margin: "0 auto" }}>
         <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr", gap: 28, marginBottom: 28 }}>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-              <div style={{ width: 34, height: 34, background: "linear-gradient(135deg,#FF6B00,#FFAA00)", borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17 }}>🇮🇳</div>
+              <div style={{ width: 34, height: 34, background: DS.gradientBrand, borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17 }}>🇮🇳</div>
               <div>
                 <div style={{ fontSize: 14, fontWeight: 900, color: DS.white, letterSpacing: 1.5, lineHeight: 1, fontFamily: "'Sora',sans-serif" }}>
                   BHARAT<span style={{ color: DS.saffron }}>NAUKRI</span>

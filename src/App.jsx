@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { DS } from "@/theme/designSystem";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { DS, applyColorMode } from "@/theme/designSystem";
 import { STATES, toSvgStateId } from "@/data/states";
 import { ALL_JOBS } from "@/data/jobs";
 import { FEED_POOL } from "@/data/feed";
@@ -12,12 +12,36 @@ const FEED_TICK_MS = 18_000;
 const INITIAL_FEED_SIZE = 6;
 const FEED_MAX = 30;
 
+const COLOR_MODE_KEY = "bharatnaukri-color-mode";
+
 export default function App() {
   const [view, setView] = useState("home");
   const [selectedState, setSelectedState] = useState(null);
   const [activeCat, setActiveCat] = useState(null);
   const [selectedJob, setSelectedJob] = useState(null);
   const [search, setSearch] = useState("");
+  const [colorMode, setColorMode] = useState(() => {
+    try {
+      return localStorage.getItem(COLOR_MODE_KEY) === "bw" ? "bw" : "dark";
+    } catch {
+      return "dark";
+    }
+  });
+
+  const onColorModeChange = useCallback((next) => {
+    applyColorMode(next);
+    document.documentElement.dataset.colorMode = next;
+    try {
+      localStorage.setItem(COLOR_MODE_KEY, next);
+    } catch {
+      /* ignore */
+    }
+    setColorMode(next);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.colorMode = colorMode;
+  }, [colorMode]);
 
   const [feedItems, setFeedItems] = useState(() =>
     FEED_POOL.slice(0, INITIAL_FEED_SIZE).map((f, i) => ({ ...f, time: Date.now() - i * 120_000 }))
@@ -89,6 +113,8 @@ export default function App() {
           search={search}
           setSearch={setSearch}
           onSearch={handleSearch}
+          colorMode={colorMode}
+          onColorModeChange={onColorModeChange}
         />
         <div style={{ flex: 1 }}>
           {selectedJob ? (

@@ -17,7 +17,7 @@ export default function JobCard({ job, onClick }) {
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        background: hov ? "#0E1828" : DS.bg1,
+        background: hov ? DS.jobCardHoverBg : DS.bg1,
         border: `1px solid ${hov ? DS.borderHi : DS.border}`,
         borderRadius: 16,
         padding: "16px 18px",

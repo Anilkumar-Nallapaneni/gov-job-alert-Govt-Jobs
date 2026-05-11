@@ -5,7 +5,7 @@ export default function CategoryGrid({ activeCat, setActiveCat, counts }) {
   return (
     <div style={{ marginBottom: 28 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 800, color: DS.white, fontFamily: "'Sora',sans-serif", margin: 0 }}>Browse by Category</h2>
+        <h2 style={{ fontSize: 13, fontWeight: 800, color: DS.white, fontFamily: "'Sora',sans-serif", margin: 0, letterSpacing: 0.2 }}>Browse by sector</h2>
         {activeCat && (
           <button
             onClick={() => setActiveCat(null)}
@@ -15,7 +15,7 @@ export default function CategoryGrid({ activeCat, setActiveCat, counts }) {
           </button>
         )}
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 8 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 8 }}>
         {CATS.map((c) => {
           const active = activeCat === c.id;
           const cnt = counts[c.id] || parseInt(c.total.replace(",", ""), 10) || 0;

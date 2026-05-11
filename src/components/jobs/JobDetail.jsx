@@ -70,7 +70,7 @@ export default function JobDetail({ job, onClose }) {
               href={job.applyUrl}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ display: "flex", alignItems: "center", gap: 7, background: "linear-gradient(135deg,#FF6B00,#FFAA00)", border: "none", borderRadius: 12, padding: "11px 22px", fontSize: 13, fontWeight: 700, color: "#060A00", cursor: "pointer", textDecoration: "none", fontFamily: "'Outfit',sans-serif" }}
+              style={{ display: "flex", alignItems: "center", gap: 7, background: DS.gradientBrand, border: "none", borderRadius: 12, padding: "11px 22px", fontSize: 13, fontWeight: 700, color: DS.inkOnBrand, cursor: "pointer", textDecoration: "none", fontFamily: "'Outfit',sans-serif" }}
             >
               🌐 Apply on Official Website ↗
             </a>
@@ -96,7 +96,7 @@ export default function JobDetail({ job, onClose }) {
         </div>
 
         <Section title="About this Recruitment">
-          <p style={{ fontSize: 13, color: "#8FA8C8", lineHeight: 1.7, margin: 0, fontFamily: "'Outfit',sans-serif" }}>{job.about}</p>
+          <p style={{ fontSize: 13, color: DS.mutedHi, lineHeight: 1.7, margin: 0, fontFamily: "'Outfit',sans-serif" }}>{job.about}</p>
         </Section>
 
         <Section title="Important Dates">
@@ -124,7 +124,7 @@ export default function JobDetail({ job, onClose }) {
                 <tbody>
                   {job.posts.map((p, i) => (
                     <tr key={i} style={{ borderBottom: `1px solid rgba(19,29,46,0.6)` }}>
-                      <td style={{ padding: "9px 8px", color: "#8FA8C8", fontFamily: "'Outfit',sans-serif" }}>{p.post}</td>
+                      <td style={{ padding: "9px 8px", color: DS.mutedHi, fontFamily: "'Outfit',sans-serif" }}>{p.post}</td>
                       <td style={{ padding: "9px 8px", textAlign: "right", color: DS.saffron, fontFamily: "'JetBrains Mono',monospace", fontWeight: 700 }}>{(p.vacancies || 0).toLocaleString()}</td>
                       <td style={{ padding: "9px 8px", textAlign: "right", color: DS.muted, fontSize: 11 }}>{p.pay}</td>
                     </tr>
@@ -140,7 +140,7 @@ export default function JobDetail({ job, onClose }) {
             {(job.selection || []).map((step, i) => (
               <li key={i} style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 13 }}>
                 <span style={{ width: 24, height: 24, borderRadius: "50%", background: `${DS.saffron}18`, border: `1px solid ${DS.saffron}40`, color: DS.saffron, fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{i + 1}</span>
-                <span style={{ color: "#8FA8C8", fontFamily: "'Outfit',sans-serif" }}>{step}</span>
+                <span style={{ color: DS.mutedHi, fontFamily: "'Outfit',sans-serif" }}>{step}</span>
               </li>
             ))}
           </ol>
@@ -151,7 +151,7 @@ export default function JobDetail({ job, onClose }) {
             {(job.howApply || []).map((step, i) => (
               <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 13 }}>
                 <span style={{ color: DS.saffron, fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, flexShrink: 0, marginTop: 1 }}>0{i + 1}</span>
-                <span style={{ color: "#8FA8C8", fontFamily: "'Outfit',sans-serif", lineHeight: 1.5 }}>{step}</span>
+                <span style={{ color: DS.mutedHi, fontFamily: "'Outfit',sans-serif", lineHeight: 1.5 }}>{step}</span>
               </li>
             ))}
           </ol>
@@ -170,24 +170,24 @@ export default function JobDetail({ job, onClose }) {
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <div style={{ fontSize: 12, fontFamily: "'Outfit',sans-serif" }}>
                 <span style={{ color: DS.muted }}>Qualification: </span>
-                <span style={{ color: "#8FA8C8" }}>{job.qual}</span>
+                <span style={{ color: DS.mutedHi }}>{job.qual}</span>
               </div>
               <div style={{ fontSize: 12, fontFamily: "'Outfit',sans-serif" }}>
                 <span style={{ color: DS.muted }}>Nationality: </span>
-                <span style={{ color: "#8FA8C8" }}>{job.nationality}</span>
+                <span style={{ color: DS.mutedHi }}>{job.nationality}</span>
               </div>
               <div style={{ fontSize: 12, fontFamily: "'Outfit',sans-serif" }}>
                 <span style={{ color: DS.muted }}>Age Relaxation: </span>
-                <span style={{ color: "#8FA8C8" }}>{job.ageRelax}</span>
+                <span style={{ color: DS.mutedHi }}>{job.ageRelax}</span>
               </div>
               <div style={{ fontSize: 12, fontFamily: "'Outfit',sans-serif" }}>
                 <span style={{ color: DS.muted }}>Attempts: </span>
-                <span style={{ color: "#8FA8C8" }}>{job.attempts}</span>
+                <span style={{ color: DS.mutedHi }}>{job.attempts}</span>
               </div>
               {job.syllabus && (
                 <div style={{ fontSize: 12, fontFamily: "'Outfit',sans-serif" }}>
                   <span style={{ color: DS.muted }}>Syllabus: </span>
-                  <span style={{ color: "#8FA8C8" }}>{job.syllabus}</span>
+                  <span style={{ color: DS.mutedHi }}>{job.syllabus}</span>
                 </div>
               )}
             </div>

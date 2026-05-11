@@ -70,8 +70,8 @@ export default function StateStrip({ selected, onSelect, stateCounts, variant = 
         <button
           onClick={() => onSelect(null)}
           style={{
-            background: !selected ? "rgba(255,107,0,0.12)" : "transparent",
-            border: `1px solid ${!selected ? "rgba(255,107,0,0.4)" : DS.border}`,
+            background: !selected ? DS.accentSoft : "transparent",
+            border: `1px solid ${!selected ? DS.accentBorderHi : DS.border}`,
             borderRadius: 20,
             padding: "4px 14px",
             fontSize: 11.5,
@@ -92,8 +92,8 @@ export default function StateStrip({ selected, onSelect, stateCounts, variant = 
               key={s.id}
               onClick={() => onSelect(active ? null : s.id)}
               style={{
-                background: active ? "rgba(255,107,0,0.12)" : "transparent",
-                border: `1px solid ${active ? "rgba(255,107,0,0.4)" : DS.border}`,
+                background: active ? DS.accentSoft : "transparent",
+                border: `1px solid ${active ? DS.accentBorderHi : DS.border}`,
                 borderRadius: 20,
                 padding: "4px 12px",
                 fontSize: 11.5,
@@ -110,7 +110,7 @@ export default function StateStrip({ selected, onSelect, stateCounts, variant = 
               <span
                 style={{
                   fontFamily: "'JetBrains Mono',monospace",
-                  color: active ? "#FFAA00" : DS.muted,
+                  color: active ? DS.gold : DS.muted,
                   fontSize: 9.5,
                 }}
               >
