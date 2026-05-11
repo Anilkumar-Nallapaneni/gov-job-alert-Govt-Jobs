@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "reac
 import { applyColorMode } from "@/theme/designSystem";
 import { STATES, toSvgStateId } from "@/data/states";
 import { ALL_JOBS } from "@/data/jobs";
+import { vacanciesForStateId } from "@/data/jobRegion";
 import { FEED_POOL } from "@/data/feed";
 import Ticker from "@/components/layout/Ticker";
 import Navbar from "@/components/layout/Navbar";
@@ -63,12 +64,11 @@ export default function App() {
     return () => clearInterval(t);
   }, []);
 
+  /** Per-state vacancy totals — same attribution as the state-filtered job list (nationwide-all-states jobs excluded). */
   const stateCounts = useMemo(() => {
     const c = {};
-    ALL_JOBS.forEach((j) => {
-      j.stateIds?.forEach((sid) => {
-        c[sid] = (c[sid] || 0) + j.vacancies;
-      });
+    STATES.forEach((s) => {
+      c[s.id] = ALL_JOBS.reduce((sum, j) => sum + vacanciesForStateId(j, s.id), 0);
     });
     return c;
   }, []);

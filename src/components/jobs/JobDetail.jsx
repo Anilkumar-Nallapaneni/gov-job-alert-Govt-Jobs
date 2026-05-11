@@ -25,6 +25,8 @@ export default function JobDetail({ job, onClose }) {
   const catColor = (CATS.find((c) => c.id === job.category) || { color: DS.saffron }).color;
   const daysLeft = Math.ceil((new Date(job.lastDate) - new Date()) / DAY_MS);
   const isUrgent = daysLeft >= 0 && daysLeft <= 7;
+  const postsVacSum = (job.posts || []).reduce((s, p) => s + (Number(p.vacancies) || 0), 0);
+  const postsSumMismatch = job.posts?.length > 0 && postsVacSum !== (Number(job.vacancies) || 0);
 
   return (
     <div
@@ -141,6 +143,11 @@ export default function JobDetail({ job, onClose }) {
 
         {job.posts?.length > 0 && (
           <Section title="Post-wise Vacancy Details">
+            {postsSumMismatch && (
+              <p style={{ fontSize: 11, color: DS.red, margin: "0 0 10px", fontFamily: "'Outfit',sans-serif", lineHeight: 1.5, background: DS.redSoftBg, border: `1px solid ${DS.redSoftBorder}`, borderRadius: 8, padding: "8px 10px" }}>
+                Post rows add up to <strong>{postsVacSum.toLocaleString("en-IN")}</strong> but the notification total is <strong>{(Number(job.vacancies) || 0).toLocaleString("en-IN")}</strong>. Treat the PDF as source of truth and update <code style={{ fontSize: 10 }}>jobs.js</code> when you reconcile annexures.
+              </p>
+            )}
             <p style={{ fontSize: 11, color: DS.muted, margin: "0 0 12px", fontFamily: "'Outfit',sans-serif", lineHeight: 1.5 }}>
               Total posts per post name; where the official notification gives a <strong style={{ color: DS.mutedHi }}>category / reservation-wise</strong> break-up, it is shown below each row (as in the advertisement annexure).
             </p>

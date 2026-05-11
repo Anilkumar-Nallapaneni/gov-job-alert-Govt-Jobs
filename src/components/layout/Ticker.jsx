@@ -1,18 +1,20 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import { DS } from "@/theme/designSystem";
+import { ALL_JOBS } from "@/data/jobs";
 
-const BASE_TICKER = [
-  "🔴 SSC CGL 2025 — 17,727 posts | Apply by 31 Jul",
-  "🟠 UP Police 60,244 Constable posts | Last date 10 Jun",
-  "🟡 RRB NTPC 11,558 posts | rrbapply.gov.in",
-  "🟢 UPSC CSE Prelims 25 May 2025 | Notification live",
-  "🔵 IBPS PO 2025 – 4,455 posts | Apply from 15 Jul",
-  "🟣 Army Agniveer 25,000 posts | No fee | Join now",
-  "⚪ SSC GD Constable 39,481 CAPFs posts | Apply 31 Aug",
-];
+function tickerLineFromJob(j) {
+  const tag = j.status === "hot" ? "🔥" : j.status === "new" ? "🆕" : "📋";
+  return `${tag} ${j.title} — ${Number(j.vacancies).toLocaleString("en-IN")} posts | Last ${j.lastDate}`;
+}
+
+/** Rotating lines built from the same job catalog as the rest of the site. */
+function buildTickerFromJobs() {
+  return [...ALL_JOBS].sort((a, b) => b.vacancies - a.vacancies).slice(0, 10).map(tickerLineFromJob);
+}
 
 export default function Ticker({ feedItems }) {
   const ref = useRef(null);
+  const baseTicker = useMemo(() => buildTickerFromJobs(), []);
 
   useEffect(() => {
     let x = 0;
@@ -32,8 +34,8 @@ export default function Ticker({ feedItems }) {
 
   const liveFeeds = feedItems
     .slice(0, 5)
-    .map((f) => `🔴 LIVE: ${f.title}${f.vacancies ? ` — ${f.vacancies.toLocaleString()} posts` : ""}`);
-  const all = [...liveFeeds, ...BASE_TICKER, ...liveFeeds, ...BASE_TICKER];
+    .map((f) => `🔴 LIVE: ${f.title}${f.vacancies != null && f.vacancies > 0 ? ` — ${Number(f.vacancies).toLocaleString("en-IN")} posts` : ""}`);
+  const all = [...liveFeeds, ...baseTicker, ...liveFeeds, ...baseTicker];
 
   return (
     <div style={{ height: 32, background: DS.bg0, borderBottom: `1px solid ${DS.border}`, display: "flex", alignItems: "center", overflow: "hidden", flexShrink: 0 }}>

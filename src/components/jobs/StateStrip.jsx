@@ -114,7 +114,7 @@ export default function StateStrip({ selected, onSelect, stateCounts, variant = 
                   fontSize: 9.5,
                 }}
               >
-                {((stateCounts[s.id] || 0) / 1000).toFixed(0)}K
+                {(stateCounts[s.id] || 0).toLocaleString("en-IN")}
               </span>
             </button>
           );

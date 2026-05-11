@@ -3,6 +3,7 @@ import { DS } from "@/theme/designSystem";
 import { STATES, toSvgStateId } from "@/data/states";
 import { CATS } from "@/data/categories";
 import { ALL_JOBS } from "@/data/jobs";
+import { isNationwideAllStatesJob, jobMatchesStateFilter } from "@/data/jobRegion";
 import { IndiaMap as IndiaSvgMap } from "@/components/Maps";
 import StateStrip from "@/components/jobs/StateStrip";
 import CategoryGrid from "@/components/jobs/CategoryGrid";
@@ -38,11 +39,6 @@ const jobMatchesQuickFilter = (job, filter) => {
   }
 };
 
-/** Jobs marked All India with every state in `stateIds` — hide when a single state is selected so the list shows state-relevant openings. */
-const isNationwideAllStatesJob = (job) =>
-  job.state === "All India" &&
-  Array.isArray(job.stateIds) &&
-  job.stateIds.length >= STATES.length;
 export default function HomePage({
   selectedState,
   setSelectedState,
@@ -81,13 +77,7 @@ export default function HomePage({
     }
 
     if (selectedState) {
-      const sn = STATES.find((s) => s.id === selectedState)?.n || "";
-      j = j.filter((x) => {
-        if (isNationwideAllStatesJob(x)) return false;
-        if (x.state === sn) return true;
-        const ids = x.stateIds;
-        return Boolean(Array.isArray(ids) && ids.length === 1 && ids[0] === selectedState);
-      });
+      j = j.filter((x) => jobMatchesStateFilter(x, selectedState));
     }
 
     if (activeCat) j = j.filter((x) => x.category === activeCat);
@@ -104,7 +94,10 @@ export default function HomePage({
 
   const displayed = showAll ? filtered : filtered.slice(0, INITIAL_JOB_LIMIT);
   const totalVac = ALL_JOBS.reduce((s, j) => s + j.vacancies, 0);
+  const totalListings = ALL_JOBS.length;
+  const hotNewCount = ALL_JOBS.filter((j) => j.status === "hot" || j.status === "new").length;
   const stateName = selectedState ? STATES.find((s) => s.id === selectedState)?.n : "";
+  const stateFilteredVac = selectedState ? filtered.reduce((s, j) => s + j.vacancies, 0) : 0;
 
   const categoryCounts = useMemo(
     () => Object.fromEntries(CATS.map((c) => [c.id, ALL_JOBS.filter((j) => j.category === c.id).reduce((s, j) => s + j.vacancies, 0)])),
@@ -236,9 +229,10 @@ export default function HomePage({
                   </div>
                   <div style={{ textAlign: "right" }}>
                     <div style={{ fontSize: 22, fontWeight: 800, color: DS.saffron, fontFamily: "'JetBrains Mono',monospace", lineHeight: 1 }}>
-                      {(stateCounts[selectedState] || 0).toLocaleString()}
+                      {stateFilteredVac.toLocaleString("en-IN")}
                     </div>
-                    <div style={{ fontSize: 9.5, color: DS.muted }}>Active Jobs</div>
+                    <div style={{ fontSize: 9.5, color: DS.muted }}>Vacancies (current filters)</div>
+                    <div style={{ fontSize: 9, color: DS.muted, marginTop: 2 }}>{filtered.length} listing{filtered.length !== 1 ? "s" : ""}</div>
                   </div>
                 </div>
               )}
@@ -297,17 +291,17 @@ export default function HomePage({
                       margin: 0,
                     }}
                   >
-                    Real-time government job alerts from UPSC, SSC, Railways, Banking, Police & more. {totalVac.toLocaleString()} active vacancies across all 28 states.
+                    Real-time government job alerts from UPSC, SSC, Railways, Banking, Police & more. {totalVac.toLocaleString("en-IN")} vacancies across {totalListings} active recruitments in our catalog.
                   </p>
                 </header>
 
                 <div style={{ marginBottom: 20 }}>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10, marginBottom: 10 }}>
                     {[
-                      { v: totalVac.toLocaleString(), l: "Active Vacancies", i: "📋" },
-                      { v: `${ALL_JOBS.filter((j) => j.status).length}`, l: "Hot/New Today", i: "🔥" },
-                      { v: "28", l: "States Covered", i: "🗺️" },
-                      { v: "10L+", l: "Monthly Users", i: "👥" },
+                      { v: totalVac.toLocaleString("en-IN"), l: "Active Vacancies", i: "📋" },
+                      { v: hotNewCount.toLocaleString("en-IN"), l: "Hot / New tags", i: "🔥" },
+                      { v: STATES.length.toLocaleString("en-IN"), l: "States & UTs (map)", i: "🗺️" },
+                      { v: totalListings.toLocaleString("en-IN"), l: "Live listings", i: "📰" },
                     ].map(({ v, l, i }) => (
                       <div key={l} style={{ background: DS.bg1, border: `1px solid ${DS.border}`, borderRadius: 12, padding: "12px 10px", textAlign: "center" }}>
                         <div style={{ fontSize: 16, marginBottom: 4 }}>{i}</div>
