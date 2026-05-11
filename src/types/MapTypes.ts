@@ -2,6 +2,7 @@ export interface StateData {
   id: string;
   fill: string;
   name: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   customData?: Record<string, any>;
 }
 

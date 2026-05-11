@@ -1,1 +1,0 @@
-export { default as JobSections } from '../../components/JobSections/JobSections';
