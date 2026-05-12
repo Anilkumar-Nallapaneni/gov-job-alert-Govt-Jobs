@@ -1,11 +1,32 @@
+import { useEffect, useState } from "react";
 import { DS } from "@/theme/designSystem";
 
 const NAV_ITEMS = ["Home", "Jobs", "Results", "Admit Card", "Alert"];
 
+/** en-IN style: "12 May 2026" */
+function formatNavDate(d) {
+  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }).replace(/,/g, "").trim();
+}
+
+/** "2:17:34 pm" */
+function formatNavTime(d) {
+  return d
+    .toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit", second: "2-digit", hour12: true })
+    .replace(/\s*a\.?m\.?/i, " am")
+    .replace(/\s*p\.?m\.?/i, " pm")
+    .toLowerCase();
+}
+
 const toViewId = (label) => label.toLowerCase().replace(" ", "-");
 
-export default function Navbar({ view, setView, search, setSearch, onSearch, colorMode = "dark", onColorModeChange }) {
+export default function Navbar({ view, setView, search, setSearch, onSearch, colorMode = "bw", onColorModeChange }) {
   const isLight = colorMode === "bw";
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
 
   return (
     <nav
@@ -90,13 +111,57 @@ export default function Navbar({ view, setView, search, setSearch, onSearch, col
         />
       </div>
 
+      <div
+        aria-live="polite"
+        aria-atomic="true"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+          justifyContent: "center",
+          flexShrink: 0,
+          lineHeight: 1.15,
+          minWidth: 0,
+          paddingRight: 4,
+        }}
+      >
+        <span
+          style={{
+            fontFamily: "Georgia, 'Times New Roman', Times, serif",
+            fontWeight: 700,
+            fontSize: 13,
+            letterSpacing: 0.02,
+            backgroundImage: "linear-gradient(180deg, #9A3412 0%, #EA580C 42%, #FBBF24 100%)",
+            WebkitBackgroundClip: "text",
+            backgroundClip: "text",
+            color: "transparent",
+            WebkitTextFillColor: "transparent",
+          }}
+        >
+          {formatNavDate(now)}
+        </span>
+        <span
+          style={{
+            marginTop: 2,
+            paddingLeft: 6,
+            fontFamily: "Georgia, 'Times New Roman', Times, serif",
+            fontWeight: 400,
+            fontSize: 11,
+            color: isLight ? "#6B7280" : "#9CA3AF",
+            letterSpacing: 0.02,
+          }}
+        >
+          {formatNavTime(now)}
+        </span>
+      </div>
+
       {typeof onColorModeChange === "function" && (
-        <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }} title="Dark or light theme">
-          <span style={{ fontSize: 10, fontWeight: 600, color: DS.muted, fontFamily: "'Outfit',sans-serif", letterSpacing: 0.2 }}>Dark</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }} title="Theme: light by default; toggle right for dark">
+          <span style={{ fontSize: 10, fontWeight: 600, color: DS.muted, fontFamily: "'Outfit',sans-serif", letterSpacing: 0.2 }}>Light</span>
           <button
             type="button"
             role="switch"
-            aria-checked={isLight}
+            aria-checked={!isLight}
             aria-label={isLight ? "Switch to dark theme" : "Switch to light theme"}
             onClick={() => onColorModeChange(isLight ? "dark" : "bw")}
             style={{
@@ -121,13 +186,13 @@ export default function Navbar({ view, setView, search, setSearch, onSearch, col
                 borderRadius: "50%",
                 background: DS.gradientBrand,
                 boxShadow: DS.switchKnobShadow,
-                transform: isLight ? "translateX(22px)" : "translateX(0)",
+                transform: isLight ? "translateX(0)" : "translateX(22px)",
                 transition: "transform 0.09s cubic-bezier(0.33, 1, 0.68, 1)",
                 willChange: "transform",
               }}
             />
           </button>
-          <span style={{ fontSize: 10, fontWeight: 600, color: DS.muted, fontFamily: "'Outfit',sans-serif", letterSpacing: 0.2 }}>Light</span>
+          <span style={{ fontSize: 10, fontWeight: 600, color: DS.muted, fontFamily: "'Outfit',sans-serif", letterSpacing: 0.2 }}>Dark</span>
         </div>
       )}
 

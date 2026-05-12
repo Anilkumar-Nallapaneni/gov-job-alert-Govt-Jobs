@@ -3,12 +3,14 @@ import { DS } from "@/theme/designSystem";
 import { STATES, toSvgStateId } from "@/data/states";
 import { CATS } from "@/data/categories";
 import { ALL_JOBS } from "@/data/jobs";
-import { isNationwideAllStatesJob, jobMatchesStateFilter } from "@/data/jobRegion";
+import { jobMatchesStateFilter } from "@/data/jobRegion";
 import { IndiaMap as IndiaSvgMap } from "@/components/Maps";
 import StateStrip from "@/components/jobs/StateStrip";
 import CategoryGrid from "@/components/jobs/CategoryGrid";
 import JobCard from "@/components/jobs/JobCard";
 import AlertSection from "@/components/home/AlertSection";
+import OfficialHeadlinesSection from "@/components/home/OfficialHeadlinesSection";
+import NotificationsSidebar from "@/components/home/NotificationsSidebar";
 import Footer from "@/components/layout/Footer";
 import "./HomePage.css";
 
@@ -53,6 +55,12 @@ export default function HomePage({
   const [showAll, setShowAll] = useState(false);
   /** Quick qualification / sector pills — filter job list (All India or state). */
   const [quickFilter, setQuickFilter] = useState(null);
+  /** Selected item in the left notifications sidebar (purely visual for now). */
+  const [sidebarKey, setSidebarKey] = useState(null);
+
+  const handleSidebarSelect = (key) => {
+    setSidebarKey((prev) => (prev === key ? null : key));
+  };
 
   useEffect(() => {
     setShowAll(false);
@@ -197,12 +205,15 @@ export default function HomePage({
           className="home-hero-grid"
           style={{
             display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
-            gap: 40,
+            gridTemplateColumns: "220px minmax(0, 1fr) minmax(0, 1fr)",
+            gap: 24,
             alignItems: selectedState ? "stretch" : "start",
           }}
         >
-          {/* Left – Map */}
+          {/* Left – Notifications sidebar */}
+          <NotificationsSidebar activeKey={sidebarKey} onSelect={handleSidebarSelect} />
+
+          {/* Middle – Map */}
           <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto" }}>
             <div style={{ width: "100%" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
@@ -456,6 +467,14 @@ export default function HomePage({
           </div>
         </div>
       </section>
+
+      <OfficialHeadlinesSection
+        stateId={selectedState}
+        categoryId={activeCat}
+        topicKey={sidebarKey}
+        search={search}
+        onClearTopic={() => setSidebarKey(null)}
+      />
 
       {!selectedState && (
         <section id="main-jobs" style={{ padding: "12px 20px 40px", maxWidth: 1240, margin: "0 auto" }}>

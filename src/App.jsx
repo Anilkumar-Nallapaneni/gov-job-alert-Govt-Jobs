@@ -28,9 +28,11 @@ export default function App() {
         localStorage.setItem(COLOR_MODE_KEY, "dark");
         return "dark";
       }
-      return v === "bw" ? "bw" : "dark";
+      if (v === "bw") return "bw";
+      if (v === "dark") return "dark";
+      return "bw";
     } catch {
-      return "dark";
+      return "bw";
     }
   });
 
@@ -46,12 +48,40 @@ export default function App() {
   }, []);
 
   useLayoutEffect(() => {
+    applyColorMode(colorMode);
     document.documentElement.dataset.colorMode = colorMode;
   }, [colorMode]);
 
   const [feedItems, setFeedItems] = useState(() =>
     FEED_POOL.slice(0, INITIAL_FEED_SIZE).map((f, i) => ({ ...f, time: Date.now() - i * 120_000 }))
   );
+
+  /** Prepend latest official RSS snapshot (from `npm run fetch:official`) into the ticker when present. */
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/data/official-feed-items.json", { cache: "no-store" });
+        if (!res.ok || cancelled) return;
+        const json = await res.json();
+        const rows = Array.isArray(json.items) ? json.items : [];
+        if (!rows.length || cancelled) return;
+        const extra = rows.slice(0, 12).map((it, i) => ({
+          title: it.title,
+          dept: it.sourceName || it.dept || "Official",
+          type: "new",
+          state: it.state || "All India",
+          time: Date.now() - (i + 1) * 90_000,
+        }));
+        setFeedItems((prev) => [...extra, ...prev].slice(0, FEED_MAX));
+      } catch {
+        /* ignore */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Auto job feed - rotates through FEED_POOL every FEED_TICK_MS.
   useEffect(() => {

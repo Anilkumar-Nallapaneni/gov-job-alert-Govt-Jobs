@@ -7,11 +7,16 @@ import './styles/global.css'
 
 try {
   const key = 'bharatnaukri-color-mode'
-  const m = localStorage.getItem(key)
-  if (m === 'night') localStorage.setItem(key, 'dark')
-  if (localStorage.getItem(key) === 'bw') applyColorMode('bw')
+  let m = localStorage.getItem(key)
+  if (m === 'night') {
+    localStorage.setItem(key, 'dark')
+    m = 'dark'
+  }
+  if (m === 'bw') applyColorMode('bw')
+  else if (m === 'dark') applyColorMode('dark')
+  else applyColorMode('bw')
 } catch {
-  /* private mode */
+  applyColorMode('bw')
 }
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(

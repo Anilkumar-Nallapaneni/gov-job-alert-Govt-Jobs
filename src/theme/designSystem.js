@@ -1,4 +1,4 @@
-/* Centralized design tokens — dark (default) and black & white (light monochrome). */
+/* Centralized design tokens — dark and black & white (light monochrome; app default is light). */
 
 const DARK = {
   bg0: "#03060D",
@@ -120,12 +120,3 @@ export const DS = new Proxy(
 if (typeof document !== "undefined") {
   syncDesignTokensToDom();
 }
-
-export const REGION_FILLS = {
-  north: { base: "#0A1E3C", hover: "#142E55", border: "#163258" },
-  south: { base: "#071A14", hover: "#0D2E1E", border: "#113824" },
-  east: { base: "#160C04", hover: "#281408", border: "#2E1A08" },
-  west: { base: "#180A14", hover: "#2C1225", border: "#341530" },
-  central: { base: "#0C0C1E", hover: "#161638", border: "#1C1C44" },
-  northeast: { base: "#061618", hover: "#0C282C", border: "#10303A" },
-};

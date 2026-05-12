@@ -1,0 +1,38 @@
+# Refreshes public/data/official-feed-items.json from official RSS URLs in scripts/official-sources.json
+# Schedule: 02:30 UTC ≈ 08:00 IST. Disable or edit if you do not want automated commits.
+name: Fetch official RSS
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 2 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run fetch:official
+
+      - name: Commit snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data/official-feed-items.json
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore(data): refresh official RSS snapshot"
+            git push
+          fi

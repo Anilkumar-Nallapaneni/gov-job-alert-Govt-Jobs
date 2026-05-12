@@ -1,0 +1,14 @@
+{
+  "_info": "Add only official RSS/Atom URLs you are permitted to poll. titleMustMatch is a case-insensitive regex; omit it to take the latest maxItems from the feed.",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+  "feeds": [
+    {
+      "id": "pib-press-reg3",
+      "name": "PIB — recent press releases (RSS region 3)",
+      "feedUrl": "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=3",
+      "dept": "Press Information Bureau",
+      "state": "All India",
+      "maxItems": 25
+    }
+  ]
+}

@@ -52,15 +52,17 @@ export default function Footer() {
           ))}
         </div>
         <div style={{ borderTop: `1px solid ${DS.border}`, paddingTop: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
-          <span style={{ fontSize: 11.5, color: "#1A2535", fontFamily: "'Outfit',sans-serif" }}>© 2025 BharatNaukri · Made with ❤️ in India · GST Registered</span>
+          <span style={{ fontSize: 11.5, color: DS.muted, fontFamily: "'Outfit',sans-serif" }}>
+            © {new Date().getFullYear()} BharatNaukri · Made with ❤️ in India · GST Registered
+          </span>
           <div style={{ display: "flex", gap: 14 }}>
             {SOCIAL_LINKS.map((s) => (
               <a
                 key={s}
                 href="#"
-                style={{ fontSize: 11.5, color: "#1A2535", fontFamily: "'Outfit',sans-serif", textDecoration: "none", transition: "color 0.12s" }}
+                style={{ fontSize: 11.5, color: DS.muted, fontFamily: "'Outfit',sans-serif", textDecoration: "none", transition: "color 0.12s" }}
                 onMouseEnter={(e) => (e.target.style.color = DS.saffron)}
-                onMouseLeave={(e) => (e.target.style.color = "#1A2535")}
+                onMouseLeave={(e) => (e.target.style.color = DS.muted)}
               >
                 {s}
               </a>
