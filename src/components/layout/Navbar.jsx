@@ -1,25 +1,26 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { DS } from "@/theme/designSystem";
+import LanguagePicker from "@/components/layout/LanguagePicker";
 
-const NAV_ITEMS = ["Home", "Jobs", "Results", "Admit Card", "Alert"];
+const NAV_KEYS = ["home", "jobs", "results", "admitCard", "alert"];
 
-/** en-IN style: "12 May 2026" */
-function formatNavDate(d) {
-  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }).replace(/,/g, "").trim();
+function formatNavDate(d, locale) {
+  return d.toLocaleDateString(locale === "en" ? "en-IN" : locale, { day: "numeric", month: "short", year: "numeric" }).replace(/,/g, "").trim();
 }
 
-/** "2:17:34 pm" */
-function formatNavTime(d) {
+function formatNavTime(d, locale) {
   return d
-    .toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit", second: "2-digit", hour12: true })
+    .toLocaleTimeString(locale === "en" ? "en-IN" : locale, { hour: "numeric", minute: "2-digit", second: "2-digit", hour12: true })
     .replace(/\s*a\.?m\.?/i, " am")
     .replace(/\s*p\.?m\.?/i, " pm")
     .toLowerCase();
 }
 
-const toViewId = (label) => label.toLowerCase().replace(" ", "-");
+const toViewId = (key) => (key === "admitCard" ? "admit-card" : key);
 
 export default function Navbar({ view, setView, search, setSearch, onSearch, colorMode = "bw", onColorModeChange }) {
+  const { t, i18n } = useTranslation();
   const isLight = colorMode === "bw";
   const [now, setNow] = useState(() => new Date());
 
@@ -63,19 +64,20 @@ export default function Navbar({ view, setView, search, setSearch, onSearch, col
         </div>
         <div>
           <div style={{ fontSize: 15, fontWeight: 900, color: DS.white, letterSpacing: 1.5, lineHeight: 1, fontFamily: "'Sora',sans-serif" }}>
-            BHARAT<span style={{ color: DS.saffron }}>NAUKRI</span>
+            {t("brand.primary")}
+            <span style={{ color: DS.saffron }}>{t("brand.accent")}</span>
           </div>
-          <div style={{ fontSize: 8, color: DS.muted, letterSpacing: 2, fontFamily: "monospace" }}>GOV JOBS PORTAL</div>
+          <div style={{ fontSize: 8, color: DS.muted, letterSpacing: 2, fontFamily: "monospace" }}>{t("brand.tagline")}</div>
         </div>
       </div>
 
       <div style={{ display: "flex", gap: 2, flex: 1, minWidth: 0, overflow: "hidden" }}>
-        {NAV_ITEMS.map((label) => {
-          const id = toViewId(label);
+        {NAV_KEYS.map((key) => {
+          const id = toViewId(key);
           const active = view === id;
           return (
             <button
-              key={label}
+              key={key}
               type="button"
               onClick={() => setView(id)}
               style={{
@@ -92,7 +94,7 @@ export default function Navbar({ view, setView, search, setSearch, onSearch, col
                 flexShrink: 0,
               }}
             >
-              {label}
+              {t(`nav.${key}`)}
             </button>
           );
         })}
@@ -106,7 +108,7 @@ export default function Navbar({ view, setView, search, setSearch, onSearch, col
           onKeyDown={(e) => {
             if (e.key === "Enter") onSearch();
           }}
-          placeholder="Search jobs, state, dept…"
+          placeholder={t("nav.searchPlaceholder")}
           style={{ background: "transparent", border: "none", outline: "none", color: DS.white, fontSize: 12.5, width: "100%", fontFamily: "'Outfit',sans-serif" }}
         />
       </div>
@@ -138,7 +140,7 @@ export default function Navbar({ view, setView, search, setSearch, onSearch, col
             WebkitTextFillColor: "transparent",
           }}
         >
-          {formatNavDate(now)}
+          {formatNavDate(now, i18n.language)}
         </span>
         <span
           style={{
@@ -151,13 +153,15 @@ export default function Navbar({ view, setView, search, setSearch, onSearch, col
             letterSpacing: 0.02,
           }}
         >
-          {formatNavTime(now)}
+          {formatNavTime(now, i18n.language)}
         </span>
       </div>
 
+      <LanguagePicker />
+
       {typeof onColorModeChange === "function" && (
-        <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }} title="Theme: light by default; toggle right for dark">
-          <span style={{ fontSize: 10, fontWeight: 600, color: DS.muted, fontFamily: "'Outfit',sans-serif", letterSpacing: 0.2 }}>Light</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }} title="Theme">
+          <span style={{ fontSize: 10, fontWeight: 600, color: DS.muted, fontFamily: "'Outfit',sans-serif", letterSpacing: 0.2 }}>{t("nav.light")}</span>
           <button
             type="button"
             role="switch"
@@ -192,7 +196,7 @@ export default function Navbar({ view, setView, search, setSearch, onSearch, col
               }}
             />
           </button>
-          <span style={{ fontSize: 10, fontWeight: 600, color: DS.muted, fontFamily: "'Outfit',sans-serif", letterSpacing: 0.2 }}>Dark</span>
+          <span style={{ fontSize: 10, fontWeight: 600, color: DS.muted, fontFamily: "'Outfit',sans-serif", letterSpacing: 0.2 }}>{t("nav.dark")}</span>
         </div>
       )}
 
@@ -212,7 +216,7 @@ export default function Navbar({ view, setView, search, setSearch, onSearch, col
           flexShrink: 0,
         }}
       >
-        Login
+        {t("nav.login")}
       </button>
     </nav>
   );

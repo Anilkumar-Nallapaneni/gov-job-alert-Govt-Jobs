@@ -1,10 +1,11 @@
 import { Fragment } from "react";
+import { useTranslation } from "react-i18next";
 import { DS } from "@/theme/designSystem";
 import { CATS } from "@/data/categories";
+import { translateDateKey, translateFeeKey } from "@/utils/jobDetailLabels";
 
 const DAY_MS = 1000 * 60 * 60 * 24;
 
-/** Sum category-wise counts; used to cross-check with post total. */
 function sumCategoryVacancies(categoryVacancies) {
   if (!categoryVacancies || typeof categoryVacancies !== "object") return 0;
   return Object.values(categoryVacancies).reduce((a, n) => a + (Number(n) || 0), 0);
@@ -22,11 +23,13 @@ function Section({ title, children }) {
 }
 
 export default function JobDetail({ job, onClose }) {
+  const { t, i18n } = useTranslation();
   const catColor = (CATS.find((c) => c.id === job.category) || { color: DS.saffron }).color;
   const daysLeft = Math.ceil((new Date(job.lastDate) - new Date()) / DAY_MS);
   const isUrgent = daysLeft >= 0 && daysLeft <= 7;
   const postsVacSum = (job.posts || []).reduce((s, p) => s + (Number(p.vacancies) || 0), 0);
   const postsSumMismatch = job.posts?.length > 0 && postsVacSum !== (Number(job.vacancies) || 0);
+  const dateLocale = i18n.language === "en" ? "en-IN" : i18n.language;
 
   return (
     <div
@@ -37,44 +40,27 @@ export default function JobDetail({ job, onClose }) {
     >
       <div style={{ maxWidth: 780, margin: "30px auto", padding: "0 16px 40px" }}>
         <button
+          type="button"
           onClick={onClose}
           style={{ background: DS.bg2, border: `1px solid ${DS.borderHi}`, borderRadius: 10, padding: "8px 16px", fontSize: 12, color: DS.mutedHi, cursor: "pointer", marginBottom: 14, fontFamily: "'Outfit',sans-serif", display: "flex", alignItems: "center", gap: 6 }}
         >
-          ← Back to Jobs
+          {t("jobDetail.back")}
         </button>
 
         <div style={{ background: DS.bg1, border: `1px solid ${DS.border}`, borderRadius: 18, padding: "22px 24px", marginBottom: 12 }}>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: `${catColor}18`, color: catColor, border: `1px solid ${catColor}40` }}>{job.category.toUpperCase()}</span>
+            <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: `${catColor}18`, color: catColor, border: `1px solid ${catColor}40` }}>
+              {t(`category.${job.category}`).toUpperCase()}
+            </span>
             <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: DS.bg3, color: DS.mutedHi, border: `1px solid ${DS.borderHi}` }}>{job.type}</span>
             {job.status === "hot" && (
-              <span
-                style={{
-                  fontSize: 11,
-                  fontWeight: 700,
-                  padding: "3px 10px",
-                  borderRadius: 20,
-                  background: DS.redSoftBg,
-                  color: DS.red,
-                  border: `1px solid ${DS.redSoftBorder}`,
-                }}
-              >
-                🔥 HOT
+              <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: DS.redSoftBg, color: DS.red, border: `1px solid ${DS.redSoftBorder}` }}>
+                🔥 {t("job.hot")}
               </span>
             )}
             {isUrgent && (
-              <span
-                style={{
-                  fontSize: 11,
-                  fontWeight: 700,
-                  padding: "3px 10px",
-                  borderRadius: 20,
-                  background: DS.redSoftBg,
-                  color: DS.red,
-                  border: `1px solid ${DS.redSoftBorder}`,
-                }}
-              >
-                ⚠️ Closing in {daysLeft} days!
+              <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: DS.redSoftBg, color: DS.red, border: `1px solid ${DS.redSoftBorder}` }}>
+                ⚠️ {t("jobDetail.closingIn", { count: daysLeft })}
               </span>
             )}
           </div>
@@ -83,10 +69,10 @@ export default function JobDetail({ job, onClose }) {
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10, marginBottom: 18 }}>
             {[
-              { l: "Total Posts", v: job.vacancies.toLocaleString(), i: "📋" },
-              { l: "Last Date", v: job.lastDate, i: "📅" },
-              { l: "Salary", v: job.salary, i: "💰" },
-              { l: "Age Limit", v: job.age, i: "👤" },
+              { l: t("jobDetail.totalPosts"), v: job.vacancies.toLocaleString(dateLocale), i: "📋" },
+              { l: t("jobDetail.lastDateLabel"), v: job.lastDate, i: "📅" },
+              { l: t("jobDetail.salary"), v: job.salary, i: "💰" },
+              { l: t("jobDetail.ageLimit"), v: job.age, i: "👤" },
             ].map(({ l, v, i }) => (
               <div key={l} style={{ background: DS.bg3, border: `1px solid ${DS.borderHi}`, borderRadius: 12, padding: "12px", textAlign: "center" }}>
                 <div style={{ fontSize: 18, marginBottom: 5 }}>{i}</div>
@@ -97,44 +83,29 @@ export default function JobDetail({ job, onClose }) {
           </div>
 
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-            <a
-              href={job.applyUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ display: "flex", alignItems: "center", gap: 7, background: DS.gradientBrand, border: "none", borderRadius: 12, padding: "11px 22px", fontSize: 13, fontWeight: 700, color: DS.inkOnBrand, cursor: "pointer", textDecoration: "none", fontFamily: "'Outfit',sans-serif" }}
-            >
-              🌐 Apply on Official Website ↗
+            <a href={job.applyUrl} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 7, background: DS.gradientBrand, border: "none", borderRadius: 12, padding: "11px 22px", fontSize: 13, fontWeight: 700, color: DS.inkOnBrand, cursor: "pointer", textDecoration: "none", fontFamily: "'Outfit',sans-serif" }}>
+              🌐 {t("jobDetail.applyOfficial")}
             </a>
             {job.pdfUrl && (
-              <a
-                href={job.pdfUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ display: "flex", alignItems: "center", gap: 7, background: DS.bg3, border: `1px solid ${DS.borderHi}`, borderRadius: 12, padding: "11px 20px", fontSize: 13, fontWeight: 600, color: DS.white, cursor: "pointer", textDecoration: "none", fontFamily: "'Outfit',sans-serif", transition: "background 0.12s" }}
-              >
-                📄 Download Notification PDF
+              <a href={job.pdfUrl} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 7, background: DS.bg3, border: `1px solid ${DS.borderHi}`, borderRadius: 12, padding: "11px 20px", fontSize: 13, fontWeight: 600, color: DS.white, cursor: "pointer", textDecoration: "none", fontFamily: "'Outfit',sans-serif" }}>
+                📄 {t("jobDetail.downloadPdf")}
               </a>
             )}
-            <a
-              href={job.officialUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: DS.muted, padding: "11px 14px", borderRadius: 12, border: `1px solid ${DS.border}`, textDecoration: "none", fontFamily: "'Outfit',sans-serif", transition: "color 0.12s" }}
-            >
-              🔗 Official Website
+            <a href={job.officialUrl} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: DS.muted, padding: "11px 14px", borderRadius: 12, border: `1px solid ${DS.border}`, textDecoration: "none", fontFamily: "'Outfit',sans-serif" }}>
+              🔗 {t("jobDetail.officialWebsite")}
             </a>
           </div>
         </div>
 
-        <Section title="About this Recruitment">
+        <Section title={t("jobDetail.aboutRecruitment")}>
           <p style={{ fontSize: 13, color: DS.mutedHi, lineHeight: 1.7, margin: 0, fontFamily: "'Outfit',sans-serif" }}>{job.about}</p>
         </Section>
 
-        <Section title="Important Dates">
+        <Section title={t("jobDetail.importantDates")}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0 }}>
             {Object.entries(job.dates || {}).map(([k, v]) => (
               <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: `1px solid ${DS.border}` }}>
-                <span style={{ fontSize: 12, color: DS.muted, fontFamily: "'Outfit',sans-serif" }}>{k}</span>
+                <span style={{ fontSize: 12, color: DS.muted, fontFamily: "'Outfit',sans-serif" }}>{translateDateKey(t, k)}</span>
                 <span style={{ fontSize: 12, fontWeight: 700, color: DS.white, fontFamily: "'JetBrains Mono',monospace" }}>{v}</span>
               </div>
             ))}
@@ -142,22 +113,20 @@ export default function JobDetail({ job, onClose }) {
         </Section>
 
         {job.posts?.length > 0 && (
-          <Section title="Post-wise Vacancy Details">
+          <Section title={t("jobDetail.postWiseVacancy")}>
             {postsSumMismatch && (
               <p style={{ fontSize: 11, color: DS.red, margin: "0 0 10px", fontFamily: "'Outfit',sans-serif", lineHeight: 1.5, background: DS.redSoftBg, border: `1px solid ${DS.redSoftBorder}`, borderRadius: 8, padding: "8px 10px" }}>
-                Post rows add up to <strong>{postsVacSum.toLocaleString("en-IN")}</strong> but the notification total is <strong>{(Number(job.vacancies) || 0).toLocaleString("en-IN")}</strong>. Treat the PDF as source of truth and update <code style={{ fontSize: 10 }}>jobs.js</code> when you reconcile annexures.
+                {t("jobDetail.postsMismatch", { sum: postsVacSum.toLocaleString(dateLocale), total: (Number(job.vacancies) || 0).toLocaleString(dateLocale) })}
               </p>
             )}
-            <p style={{ fontSize: 11, color: DS.muted, margin: "0 0 12px", fontFamily: "'Outfit',sans-serif", lineHeight: 1.5 }}>
-              Total posts per post name; where the official notification gives a <strong style={{ color: DS.mutedHi }}>category / reservation-wise</strong> break-up, it is shown below each row (as in the advertisement annexure).
-            </p>
+            <p style={{ fontSize: 11, color: DS.muted, margin: "0 0 12px", fontFamily: "'Outfit',sans-serif", lineHeight: 1.5 }}>{t("jobDetail.postWiseHint")}</p>
             <div style={{ overflowX: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                 <thead>
                   <tr style={{ borderBottom: `1px solid ${DS.border}` }}>
-                    <th style={{ textAlign: "left", padding: "6px 8px", color: DS.muted, fontFamily: "'Outfit',sans-serif", fontWeight: 600 }}>Post Name</th>
-                    <th style={{ textAlign: "right", padding: "6px 8px", color: DS.muted, fontFamily: "'Outfit',sans-serif", fontWeight: 600 }}>Vacancies</th>
-                    <th style={{ textAlign: "right", padding: "6px 8px", color: DS.muted, fontFamily: "'Outfit',sans-serif", fontWeight: 600 }}>Pay Level</th>
+                    <th style={{ textAlign: "left", padding: "6px 8px", color: DS.muted, fontFamily: "'Outfit',sans-serif", fontWeight: 600 }}>{t("jobDetail.postName")}</th>
+                    <th style={{ textAlign: "right", padding: "6px 8px", color: DS.muted, fontFamily: "'Outfit',sans-serif", fontWeight: 600 }}>{t("home.vacancies")}</th>
+                    <th style={{ textAlign: "right", padding: "6px 8px", color: DS.muted, fontFamily: "'Outfit',sans-serif", fontWeight: 600 }}>{t("jobDetail.payLevel")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -169,38 +138,36 @@ export default function JobDetail({ job, onClose }) {
                       <Fragment key={`post-${p.post || i}`}>
                         <tr style={{ borderBottom: showCat ? "none" : `1px solid ${DS.tableRowBorder}` }}>
                           <td style={{ padding: "9px 8px", color: DS.mutedHi, fontFamily: "'Outfit',sans-serif", verticalAlign: "top" }}>{p.post}</td>
-                          <td style={{ padding: "9px 8px", textAlign: "right", color: DS.saffron, fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, verticalAlign: "top" }}>{(p.vacancies || 0).toLocaleString()}</td>
+                          <td style={{ padding: "9px 8px", textAlign: "right", color: DS.saffron, fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, verticalAlign: "top" }}>{(p.vacancies || 0).toLocaleString(dateLocale)}</td>
                           <td style={{ padding: "9px 8px", textAlign: "right", color: DS.muted, fontSize: 11, verticalAlign: "top" }}>{p.pay}</td>
                         </tr>
                         {showCat && (
                           <tr style={{ borderBottom: `1px solid ${DS.tableRowBorder}` }}>
                             <td colSpan={3} style={{ padding: "0 8px 12px 16px", background: DS.bg0 }}>
-                              <div style={{ fontSize: 10, fontWeight: 700, color: DS.saffron, letterSpacing: 0.8, marginBottom: 8, fontFamily: "'Outfit',sans-serif", textTransform: "uppercase" }}>
-                                Category-wise vacancies (as per notification)
-                              </div>
+                              <div style={{ fontSize: 10, fontWeight: 700, color: DS.saffron, letterSpacing: 0.8, marginBottom: 8, fontFamily: "'Outfit',sans-serif", textTransform: "uppercase" }}>{t("jobDetail.categoryWiseVacancy")}</div>
                               <table style={{ width: "100%", maxWidth: 420, borderCollapse: "collapse", fontSize: 11 }}>
                                 <thead>
                                   <tr>
-                                    <th style={{ textAlign: "left", padding: "5px 8px", color: DS.muted, fontWeight: 600, borderBottom: `1px solid ${DS.border}`, fontFamily: "'Outfit',sans-serif" }}>Category</th>
-                                    <th style={{ textAlign: "right", padding: "5px 8px", color: DS.muted, fontWeight: 600, borderBottom: `1px solid ${DS.border}`, fontFamily: "'Outfit',sans-serif" }}>Posts</th>
+                                    <th style={{ textAlign: "left", padding: "5px 8px", color: DS.muted, fontWeight: 600, borderBottom: `1px solid ${DS.border}`, fontFamily: "'Outfit',sans-serif" }}>{t("jobDetail.categoryCol")}</th>
+                                    <th style={{ textAlign: "right", padding: "5px 8px", color: DS.muted, fontWeight: 600, borderBottom: `1px solid ${DS.border}`, fontFamily: "'Outfit',sans-serif" }}>{t("job.posts")}</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   {Object.entries(cat).map(([label, n]) => (
                                     <tr key={label}>
                                       <td style={{ padding: "6px 8px", color: DS.mutedHi, fontFamily: "'Outfit',sans-serif", borderBottom: `1px solid ${DS.tableRowBorder}` }}>{label}</td>
-                                      <td style={{ padding: "6px 8px", textAlign: "right", color: DS.white, fontFamily: "'JetBrains Mono',monospace", fontWeight: 600, borderBottom: `1px solid ${DS.tableRowBorder}` }}>{Number(n).toLocaleString()}</td>
+                                      <td style={{ padding: "6px 8px", textAlign: "right", color: DS.white, fontFamily: "'JetBrains Mono',monospace", fontWeight: 600, borderBottom: `1px solid ${DS.tableRowBorder}` }}>{Number(n).toLocaleString(dateLocale)}</td>
                                     </tr>
                                   ))}
                                   <tr>
-                                    <td style={{ padding: "7px 8px", color: DS.muted, fontFamily: "'Outfit',sans-serif", fontWeight: 600 }}>Total (category-wise)</td>
-                                    <td style={{ padding: "7px 8px", textAlign: "right", color: DS.saffron, fontFamily: "'JetBrains Mono',monospace", fontWeight: 700 }}>{catSum.toLocaleString()}</td>
+                                    <td style={{ padding: "7px 8px", color: DS.muted, fontFamily: "'Outfit',sans-serif", fontWeight: 600 }}>{t("jobDetail.categoryTotal")}</td>
+                                    <td style={{ padding: "7px 8px", textAlign: "right", color: DS.saffron, fontFamily: "'JetBrains Mono',monospace", fontWeight: 700 }}>{catSum.toLocaleString(dateLocale)}</td>
                                   </tr>
                                 </tbody>
                               </table>
                               {catSum !== (p.vacancies || 0) && (
                                 <div style={{ fontSize: 10, color: DS.muted, marginTop: 6, fontFamily: "'Outfit',sans-serif" }}>
-                                  Note: Category total ({catSum.toLocaleString()}) differs from post total ({(p.vacancies || 0).toLocaleString()}) — align figures with the official PDF.
+                                  {t("jobDetail.categoryNote", { catSum: catSum.toLocaleString(dateLocale), postTotal: (p.vacancies || 0).toLocaleString(dateLocale) })}
                                 </div>
                               )}
                             </td>
@@ -215,7 +182,7 @@ export default function JobDetail({ job, onClose }) {
           </Section>
         )}
 
-        <Section title="Selection Process">
+        <Section title={t("jobDetail.selectionProcess")}>
           <ol style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
             {(job.selection || []).map((step, i) => (
               <li key={i} style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 13 }}>
@@ -226,7 +193,7 @@ export default function JobDetail({ job, onClose }) {
           </ol>
         </Section>
 
-        <Section title="How to Apply – Step by Step">
+        <Section title={t("jobDetail.howToApply")}>
           <ol style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
             {(job.howApply || []).map((step, i) => (
               <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 13 }}>
@@ -238,35 +205,35 @@ export default function JobDetail({ job, onClose }) {
         </Section>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          <Section title="Application Fee">
+          <Section title={t("jobDetail.applicationFee")}>
             {Object.entries(job.fee || {}).map(([k, v]) => (
               <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: `1px solid ${DS.border}` }}>
-                <span style={{ fontSize: 12, color: DS.muted, fontFamily: "'Outfit',sans-serif" }}>{k}</span>
+                <span style={{ fontSize: 12, color: DS.muted, fontFamily: "'Outfit',sans-serif" }}>{translateFeeKey(t, k)}</span>
                 <span style={{ fontSize: 12, fontWeight: 600, color: DS.white, fontFamily: "'Outfit',sans-serif" }}>{v}</span>
               </div>
             ))}
           </Section>
-          <Section title="Eligibility Details">
+          <Section title={t("jobDetail.eligibilityDetails")}>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <div style={{ fontSize: 12, fontFamily: "'Outfit',sans-serif" }}>
-                <span style={{ color: DS.muted }}>Qualification: </span>
+                <span style={{ color: DS.muted }}>{t("jobDetail.qualification")} </span>
                 <span style={{ color: DS.mutedHi }}>{job.qual}</span>
               </div>
               <div style={{ fontSize: 12, fontFamily: "'Outfit',sans-serif" }}>
-                <span style={{ color: DS.muted }}>Nationality: </span>
+                <span style={{ color: DS.muted }}>{t("jobDetail.nationality")} </span>
                 <span style={{ color: DS.mutedHi }}>{job.nationality}</span>
               </div>
               <div style={{ fontSize: 12, fontFamily: "'Outfit',sans-serif" }}>
-                <span style={{ color: DS.muted }}>Age Relaxation: </span>
+                <span style={{ color: DS.muted }}>{t("jobDetail.ageRelaxation")} </span>
                 <span style={{ color: DS.mutedHi }}>{job.ageRelax}</span>
               </div>
               <div style={{ fontSize: 12, fontFamily: "'Outfit',sans-serif" }}>
-                <span style={{ color: DS.muted }}>Attempts: </span>
+                <span style={{ color: DS.muted }}>{t("jobDetail.attempts")} </span>
                 <span style={{ color: DS.mutedHi }}>{job.attempts}</span>
               </div>
               {job.syllabus && (
                 <div style={{ fontSize: 12, fontFamily: "'Outfit',sans-serif" }}>
-                  <span style={{ color: DS.muted }}>Syllabus: </span>
+                  <span style={{ color: DS.muted }}>{t("jobDetail.syllabus")} </span>
                   <span style={{ color: DS.mutedHi }}>{job.syllabus}</span>
                 </div>
               )}
@@ -276,11 +243,11 @@ export default function JobDetail({ job, onClose }) {
 
         <div style={{ background: `${DS.saffron}08`, border: `1px solid ${DS.saffron}25`, borderRadius: 12, padding: "14px 18px", display: "flex", gap: 20, flexWrap: "wrap" }}>
           <div>
-            <span style={{ fontSize: 11, color: DS.muted }}>📞 Helpdesk: </span>
+            <span style={{ fontSize: 11, color: DS.muted }}>📞 {t("jobDetail.helpdesk")} </span>
             <span style={{ fontSize: 12, fontWeight: 600, color: DS.white, fontFamily: "monospace" }}>{job.helpdesk}</span>
           </div>
           <div>
-            <span style={{ fontSize: 11, color: DS.muted }}>📧 Email: </span>
+            <span style={{ fontSize: 11, color: DS.muted }}>📧 {t("jobDetail.email")} </span>
             <a href={`mailto:${job.email}`} style={{ fontSize: 12, fontWeight: 600, color: DS.saffron, fontFamily: "monospace", textDecoration: "none" }}>
               {job.email}
             </a>
@@ -288,7 +255,7 @@ export default function JobDetail({ job, onClose }) {
         </div>
 
         <div style={{ marginTop: 14, padding: "12px 16px", background: DS.bg3, border: `1px solid ${DS.borderHi}`, borderRadius: 10, fontSize: 11.5, color: DS.muted, lineHeight: 1.6, fontFamily: "'Outfit',sans-serif" }}>
-          ⚠️ Disclaimer: BharatNaukri is an independent aggregator. Always verify details at the official website before applying. We are not responsible for any errors or changes in information.
+          ⚠️ {t("jobDetail.disclaimer")}
         </div>
       </div>
     </div>

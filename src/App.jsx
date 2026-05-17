@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { applyColorMode } from "@/theme/designSystem";
 import { STATES, toSvgStateId } from "@/data/states";
 import { ALL_JOBS } from "@/data/jobs";
@@ -16,6 +17,7 @@ const FEED_MAX = 30;
 const COLOR_MODE_KEY = "bharatnaukri-color-mode";
 
 export default function App() {
+  const { i18n } = useTranslation();
   const [view, setView] = useState("home");
   const [selectedState, setSelectedState] = useState(null);
   const [activeCat, setActiveCat] = useState(null);
@@ -141,7 +143,7 @@ export default function App() {
         />
         <div style={{ flex: 1 }}>
           {selectedJob ? (
-            <JobDetail job={selectedJob} onClose={() => setSelectedJob(null)} />
+            <JobDetail key={`${selectedJob.id}-${i18n.language}`} job={selectedJob} onClose={() => setSelectedJob(null)} />
           ) : (
             <HomePage
               selectedState={selectedState}

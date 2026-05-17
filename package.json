@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "vite",
     "fetch:official": "node scripts/fetch-official-feeds.mjs",
+    "i18n:generate": "node scripts/generate-locale-overrides.mjs",
+    "i18n:fill": "node scripts/fill-locale-flats.mjs",
     "clean": "node -e \"const fs=require('fs');try{fs.rmSync('dist',{recursive:true,force:true})}catch(e){if(e.code!=='ENOENT')throw e}\"",
     "build": "npm run clean && tsc && vite build",
     "serve": "vite preview",
@@ -12,11 +14,12 @@
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "i18next": "^26.2.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-i18next": "^17.0.8"
   },
   "devDependencies": {
-    "rss-parser": "^3.13.0",
     "@eslint/js": "^9.39.1",
     "@types/eslint": "^9.6.1",
     "@types/node": "^24.10.0",
@@ -27,6 +30,7 @@
     "@vitejs/plugin-react": "^4.7.0",
     "baseline-browser-mapping": "^2.10.27",
     "eslint": "^9.39.1",
+    "rss-parser": "^3.13.0",
     "typescript": "^5.9.3",
     "vite": "^7.2.2"
   }

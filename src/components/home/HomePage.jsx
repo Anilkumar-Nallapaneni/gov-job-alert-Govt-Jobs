@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { DS } from "@/theme/designSystem";
 import { STATES, toSvgStateId } from "@/data/states";
 import { CATS } from "@/data/categories";
@@ -15,26 +16,26 @@ import Footer from "@/components/layout/Footer";
 import "./HomePage.css";
 
 const INITIAL_JOB_LIMIT = 8;
-const QUICK_FILTERS = ["10th Pass", "12th Pass", "Graduate", "Engineering", "Defence", "Banking", "Police"];
+const QUICK_FILTER_KEYS = ["tenth", "twelfth", "graduate", "engineering", "defence", "banking", "police"];
 
 /** Narrow state-mode job list by the quick pill (qualification / sector). */
-const jobMatchesQuickFilter = (job, filter) => {
+const jobMatchesQuickFilter = (job, filterKey) => {
   const q = `${job.qual || ""} ${job.title || ""} ${job.dept || ""}`.toLowerCase();
   const cat = job.category;
-  switch (filter) {
-    case "10th Pass":
+  switch (filterKey) {
+    case "tenth":
       return /\b10th\b|10\s*th|class\s*10|matric/i.test(q);
-    case "12th Pass":
+    case "twelfth":
       return /12th|10\s*\+\s*2|intermediate|10\+2|hsc\b/i.test(q);
-    case "Graduate":
+    case "graduate":
       return /graduate|grad\.|b\.a|b\.sc|b\.com|b\.ed|degree|pg|post\s*grad|master/i.test(q);
-    case "Engineering":
+    case "engineering":
       return /engineer|b\.tech|b\.e\.|m\.tech|gate|diploma\s*\(eng|ece|cse|mechanical|civil/i.test(q);
-    case "Defence":
+    case "defence":
       return cat === "defence";
-    case "Banking":
+    case "banking":
       return cat === "banking";
-    case "Police":
+    case "police":
       return cat === "police";
     default:
       return true;
@@ -51,6 +52,7 @@ export default function HomePage({
   search,
   mapStateData,
 }) {
+  const { t } = useTranslation();
   const [sort, setSort] = useState("lastDate");
   const [showAll, setShowAll] = useState(false);
   /** Quick qualification / sector pills — filter job list (All India or state). */
@@ -155,7 +157,7 @@ export default function HomePage({
           >
             <div style={{ height: 2, width: 28, background: DS.gradientRule, flexShrink: 0 }} />
             <span style={{ fontSize: 11, fontWeight: 700, color: DS.saffron, letterSpacing: 3, fontFamily: "monospace" }}>
-              {"INDIA'S #1 GOVT JOBS PORTAL"}
+              {t("home.tagline")}
             </span>
           </div>
         )}
@@ -170,10 +172,10 @@ export default function HomePage({
             }}
           >
             <div style={{ fontSize: 10.5, fontWeight: 700, color: DS.muted, letterSpacing: 1, fontFamily: "'Outfit',sans-serif", marginBottom: 10 }}>
-              FILTER LISTINGS
+              {t("home.filterListings")}
             </div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-              {QUICK_FILTERS.map((f) => {
+              {QUICK_FILTER_KEYS.map((f) => {
                 const on = quickFilter === f;
                 return (
                   <button
@@ -193,7 +195,7 @@ export default function HomePage({
                       transition: "all 0.12s",
                     }}
                   >
-                    {f}
+                    {t(`quickFilter.${f}`)}
                   </button>
                 );
               })}
@@ -219,7 +221,9 @@ export default function HomePage({
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                   <span style={{ width: 7, height: 7, borderRadius: "50%", background: DS.saffron, boxShadow: `0 0 8px ${DS.saffron}` }} />
-                  <span style={{ fontSize: 12, fontWeight: 700, color: DS.white, fontFamily: "'Outfit',sans-serif" }}>{stateName || "All India"} — Job Map</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: DS.white, fontFamily: "'Outfit',sans-serif" }}>
+                    {stateName ? t("home.jobMap", { state: stateName }) : t("home.allIndiaJobMap")}
+                  </span>
                 </div>
                 {selectedState && (
                   <button
@@ -227,7 +231,7 @@ export default function HomePage({
                     onClick={() => setSelectedState(null)}
                     style={{ background: "transparent", border: `1px solid ${DS.border}`, borderRadius: 7, padding: "3px 10px", fontSize: 11, color: DS.muted, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}
                   >
-                    ✕ Clear
+                    {t("home.clear")}
                   </button>
                 )}
               </div>
@@ -236,14 +240,14 @@ export default function HomePage({
                 <div style={{ background: DS.panelWarm, border: `1px solid ${DS.accentBorder}`, borderRadius: 12, padding: "10px 14px", marginBottom: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <div>
                     <div style={{ fontSize: 12, color: DS.saffron, fontWeight: 600, marginBottom: 2 }}>📍 {stateName}</div>
-                    <div style={{ fontSize: 10.5, color: DS.muted }}>Region: {STATES.find((s) => s.id === selectedState)?.reg}</div>
+                    <div style={{ fontSize: 10.5, color: DS.muted }}>{t("home.region")} {STATES.find((s) => s.id === selectedState)?.reg}</div>
                   </div>
                   <div style={{ textAlign: "right" }}>
                     <div style={{ fontSize: 22, fontWeight: 800, color: DS.saffron, fontFamily: "'JetBrains Mono',monospace", lineHeight: 1 }}>
                       {stateFilteredVac.toLocaleString("en-IN")}
                     </div>
-                    <div style={{ fontSize: 9.5, color: DS.muted }}>Vacancies (current filters)</div>
-                    <div style={{ fontSize: 9, color: DS.muted, marginTop: 2 }}>{filtered.length} listing{filtered.length !== 1 ? "s" : ""}</div>
+                    <div style={{ fontSize: 9.5, color: DS.muted }}>{t("home.vacanciesFiltered")}</div>
+                    <div style={{ fontSize: 9, color: DS.muted, marginTop: 2 }}>{t("home.listing", { count: filtered.length })}</div>
                   </div>
                 </div>
               )}
@@ -290,7 +294,7 @@ export default function HomePage({
                       letterSpacing: 0.3,
                     }}
                   >
-                    Find your <span style={{ color: DS.saffron }}>dream job</span>
+                    {t("home.dreamJobPrefix")} <span style={{ color: DS.saffron }}>{t("home.dreamJobHighlight")}</span>
                   </h1>
                   <p
                     style={{
@@ -302,17 +306,17 @@ export default function HomePage({
                       margin: 0,
                     }}
                   >
-                    Real-time government job alerts from UPSC, SSC, Railways, Banking, Police & more. {totalVac.toLocaleString("en-IN")} vacancies across {totalListings} active recruitments in our catalog.
+                    {t("home.heroDesc", { vacancies: totalVac.toLocaleString("en-IN"), listings: totalListings })}
                   </p>
                 </header>
 
                 <div style={{ marginBottom: 20 }}>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10, marginBottom: 10 }}>
                     {[
-                      { v: totalVac.toLocaleString("en-IN"), l: "Active Vacancies", i: "📋" },
-                      { v: hotNewCount.toLocaleString("en-IN"), l: "Hot / New tags", i: "🔥" },
-                      { v: STATES.length.toLocaleString("en-IN"), l: "States & UTs (map)", i: "🗺️" },
-                      { v: totalListings.toLocaleString("en-IN"), l: "Live listings", i: "📰" },
+                      { v: totalVac.toLocaleString("en-IN"), l: t("home.activeVacancies"), i: "📋" },
+                      { v: hotNewCount.toLocaleString("en-IN"), l: t("home.hotNewTags"), i: "🔥" },
+                      { v: STATES.length.toLocaleString("en-IN"), l: t("home.statesMap"), i: "🗺️" },
+                      { v: totalListings.toLocaleString("en-IN"), l: t("home.liveListings"), i: "📰" },
                     ].map(({ v, l, i }) => (
                       <div key={l} style={{ background: DS.bg1, border: `1px solid ${DS.border}`, borderRadius: 12, padding: "12px 10px", textAlign: "center" }}>
                         <div style={{ fontSize: 16, marginBottom: 4 }}>{i}</div>
@@ -331,7 +335,7 @@ export default function HomePage({
                     }}
                   >
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10, gap: 12 }}>
-                      <h2 style={{ fontSize: 13, fontWeight: 800, color: DS.white, fontFamily: "'Sora',sans-serif", margin: 0, letterSpacing: 0.2 }}>Browse by Education</h2>
+                      <h2 style={{ fontSize: 13, fontWeight: 800, color: DS.white, fontFamily: "'Sora',sans-serif", margin: 0, letterSpacing: 0.2 }}>{t("home.browseEducation")}</h2>
                       {quickFilter && (
                         <button
                           type="button"
@@ -348,12 +352,12 @@ export default function HomePage({
                             flexShrink: 0,
                           }}
                         >
-                          Clear filter
+                          {t("home.clearFilter")}
                         </button>
                       )}
                     </div>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-                      {QUICK_FILTERS.map((f) => {
+                      {QUICK_FILTER_KEYS.map((f) => {
                         const on = quickFilter === f;
                         return (
                           <button
@@ -373,7 +377,7 @@ export default function HomePage({
                               transition: "background 0.12s, border-color 0.12s, color 0.12s",
                             }}
                           >
-                            {f}
+                            {t(`quickFilter.${f}`)}
                           </button>
                         );
                       })}
@@ -388,12 +392,14 @@ export default function HomePage({
             ) : (
               <>
                 <h2 style={{ fontSize: 18, fontWeight: 800, color: DS.white, fontFamily: "'Sora',sans-serif", margin: "0 0 6px", flexShrink: 0 }}>
-                  {`Jobs in ${stateName}`}
+                  {t("home.jobsInState", { state: stateName })}
                 </h2>
                 <p style={{ fontSize: 12, color: DS.muted, fontFamily: "'Outfit',sans-serif", margin: "0 0 12px", flexShrink: 0 }}>
-                  {filtered.length} listing{filtered.length !== 1 ? "s" : ""} ·{" "}
-                  {filtered.reduce((s, j) => s + j.vacancies, 0).toLocaleString()} vacancies
-                  {quickFilter ? ` · ${quickFilter}` : ""}
+                  {t("home.jobsCount", {
+                    count: filtered.length,
+                    vacancies: filtered.reduce((s, j) => s + j.vacancies, 0).toLocaleString("en-IN"),
+                  })}
+                  {quickFilter ? ` · ${t(`quickFilter.${quickFilter}`)}` : ""}
                 </p>
                 <div
                   style={{
@@ -406,7 +412,7 @@ export default function HomePage({
                     flexShrink: 0,
                   }}
                 >
-                  <span style={{ fontSize: 11.5, color: DS.muted, fontFamily: "'Outfit',sans-serif" }}>Sort:</span>
+                  <span style={{ fontSize: 11.5, color: DS.muted, fontFamily: "'Outfit',sans-serif" }}>{t("home.sort")}</span>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     {["lastDate", "vacancies"].map((s) => (
                       <button
@@ -424,7 +430,7 @@ export default function HomePage({
                           fontFamily: "'Outfit',sans-serif",
                         }}
                       >
-                        {s === "lastDate" ? "Deadline" : "Vacancies"}
+                        {s === "lastDate" ? t("home.deadline") : t("home.vacancies")}
                       </button>
                     ))}
                   </div>
@@ -456,7 +462,7 @@ export default function HomePage({
                         lineHeight: 1.55,
                       }}
                     >
-                      No state-specific listings in the sample data for this region. Use ✕ Clear on the map or pick All India in the state strip to return to the full homepage.
+                      {t("home.noStateListings")}
                     </div>
                   ) : (
                     filtered.map((job) => <JobCard key={job.id} job={job} onClick={() => onJobClick(job)} />)
@@ -481,15 +487,22 @@ export default function HomePage({
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
             <div>
               <h2 style={{ fontSize: 16, fontWeight: 800, color: DS.white, fontFamily: "'Sora',sans-serif", margin: "0 0 3px" }}>
-                {activeCat ? `${CATS.find((c) => c.id === activeCat)?.name || ""} Jobs` : search ? "Search Results" : "Latest Government Jobs"}
+                {activeCat
+                  ? t("home.categoryJobs", { category: t(`category.${activeCat}`) })
+                  : search
+                    ? t("home.searchResults")
+                    : t("home.latestJobs")}
               </h2>
               <p style={{ fontSize: 12, color: DS.muted, fontFamily: "'Outfit',sans-serif", margin: 0 }}>
-                {filtered.length} jobs · {filtered.reduce((s, j) => s + j.vacancies, 0).toLocaleString()} total vacancies
-                {quickFilter ? ` · ${quickFilter}` : ""}
+                {t("home.jobsMeta", {
+                  count: filtered.length,
+                  vacancies: filtered.reduce((s, j) => s + j.vacancies, 0).toLocaleString("en-IN"),
+                })}
+                {quickFilter ? ` · ${t(`quickFilter.${quickFilter}`)}` : ""}
               </p>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 11.5, color: DS.muted, fontFamily: "'Outfit',sans-serif" }}>Sort:</span>
+              <span style={{ fontSize: 11.5, color: DS.muted, fontFamily: "'Outfit',sans-serif" }}>{t("home.sort")}</span>
               {["lastDate", "vacancies"].map((s) => (
                 <button
                   key={s}
@@ -506,7 +519,7 @@ export default function HomePage({
                     fontFamily: "'Outfit',sans-serif",
                   }}
                 >
-                  {s === "lastDate" ? "Deadline" : "Vacancies"}
+                  {s === "lastDate" ? t("home.deadline") : t("home.vacancies")}
                 </button>
               ))}
             </div>
@@ -515,8 +528,8 @@ export default function HomePage({
           {filtered.length === 0 ? (
             <div style={{ textAlign: "center", padding: "60px 0", color: DS.muted, fontFamily: "'Outfit',sans-serif" }}>
               <div style={{ fontSize: 44, marginBottom: 12 }}>📭</div>
-              <div style={{ fontSize: 17, fontWeight: 600, marginBottom: 6, color: DS.mutedHi }}>No jobs found</div>
-              <div style={{ fontSize: 13 }}>Try removing filters or selecting a different state</div>
+              <div style={{ fontSize: 17, fontWeight: 600, marginBottom: 6, color: DS.mutedHi }}>{t("home.noJobs")}</div>
+              <div style={{ fontSize: 13 }}>{t("home.noJobsHint")}</div>
             </div>
           ) : (
             <>
@@ -532,7 +545,7 @@ export default function HomePage({
                     onClick={() => setShowAll(true)}
                     style={{ background: DS.bg1, border: `1px solid ${DS.accentBorder}`, borderRadius: 12, padding: "12px 32px", fontSize: 13, fontWeight: 600, color: DS.saffron, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}
                   >
-                    Load More Jobs ({filtered.length - INITIAL_JOB_LIMIT} more) ↓
+                    {t("home.loadMore", { count: filtered.length - INITIAL_JOB_LIMIT })}
                   </button>
                 </div>
               )}

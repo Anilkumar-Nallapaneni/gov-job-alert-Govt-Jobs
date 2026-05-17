@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { DS } from "@/theme/designSystem";
 import { STATES } from "@/data/states";
 
@@ -10,6 +11,7 @@ const TOP_STATE_COUNT = 16;
  * - subheader: chips only row, right-aligned in a flex bar (use with hideLabel)
  */
 export default function StateStrip({ selected, onSelect, stateCounts, variant = "full", hideLabel }) {
+  const { t } = useTranslation();
   const sorted = [...STATES]
     .sort((a, b) => (stateCounts[b.id] || 0) - (stateCounts[a.id] || 0))
     .slice(0, TOP_STATE_COUNT);
@@ -64,7 +66,7 @@ export default function StateStrip({ selected, onSelect, stateCounts, variant = 
               flexShrink: 0,
             }}
           >
-            TOP STATES:
+            {t("stateStrip.topStates")}
           </span>
         )}
         <button
@@ -83,7 +85,7 @@ export default function StateStrip({ selected, onSelect, stateCounts, variant = 
             transition: "all 0.12s",
           }}
         >
-          🇮🇳 All India
+          🇮🇳 {t("stateStrip.allIndia")}
         </button>
         {sorted.map((s) => {
           const active = selected === s.id;

@@ -1,64 +1,58 @@
+import { useTranslation } from "react-i18next";
 import { DS } from "@/theme/designSystem";
-
-/**
- * Compact sidebar that appears to the left of the India map on the homepage.
- * Mirrors the classic "Sarkari-result" style three-section navigation:
- *   1) Notifications   2) Latest Announcements   3) Others
- *
- * Each item is a button that bubbles up a `key` to the parent so the homepage
- * can drive filters / route changes. Items with `href` open as anchors instead.
- */
 
 const SECTIONS = [
   {
     id: "notifications",
-    title: "Notifications",
+    titleKey: "sidebar.notifications",
     items: [
-      { key: "latest", label: "Latest Notifications", highlight: true },
-      { key: "employment-news", label: "Employment News" },
-      { key: "search-jobs", label: "Search Jobs" },
-      { key: "sarkari-job", label: "Sarkari Job" },
-      { key: "sarkari-naukri", label: "Sarkari Naukri" },
-      { key: "anganwadi", label: "Anganwadi Recruitment" },
-      { key: "forest", label: "Forest Jobs" },
-      { key: "education", label: "EDUCATION" },
-      { key: "mock-test", label: "Free Mock Test" },
+      { key: "latest", labelKey: "sidebar.latest", highlight: true },
+      { key: "employment-news", labelKey: "sidebar.employmentNews" },
+      { key: "search-jobs", labelKey: "sidebar.searchJobs" },
+      { key: "sarkari-job", labelKey: "sidebar.sarkariJob" },
+      { key: "sarkari-naukri", labelKey: "sidebar.sarkariNaukri" },
+      { key: "anganwadi", labelKey: "sidebar.anganwadi" },
+      { key: "forest", labelKey: "sidebar.forest" },
+      { key: "education", labelKey: "sidebar.education" },
+      { key: "mock-test", labelKey: "sidebar.mockTest" },
     ],
   },
   {
     id: "announcements",
-    title: "Latest Announcements",
+    titleKey: "sidebar.announcements",
     items: [
-      { key: "sarkari-result", label: "Sarkari Result" },
-      { key: "admit-card", label: "Admit Card" },
-      { key: "exam-results", label: "Exam Results" },
-      { key: "answer-key", label: "Answer Key" },
-      { key: "cutoff", label: "Cutoff Marks" },
-      { key: "written-marks", label: "Written Marks" },
-      { key: "interview", label: "Interview Results" },
-      { key: "last-date", label: "Last Date Reminder" },
+      { key: "sarkari-result", labelKey: "sidebar.sarkariResult" },
+      { key: "admit-card", labelKey: "sidebar.admitCard" },
+      { key: "exam-results", labelKey: "sidebar.examResults" },
+      { key: "answer-key", labelKey: "sidebar.answerKey" },
+      { key: "cutoff", labelKey: "sidebar.cutoff" },
+      { key: "written-marks", labelKey: "sidebar.writtenMarks" },
+      { key: "interview", labelKey: "sidebar.interview" },
+      { key: "last-date", labelKey: "sidebar.lastDate" },
     ],
   },
   {
     id: "others",
-    title: "Others",
+    titleKey: "sidebar.others",
     items: [
-      { key: "eligibility", label: "Eligibility" },
-      { key: "syllabus", label: "Syllabus" },
-      { key: "exam-pattern", label: "Exam Pattern" },
-      { key: "selection", label: "Selection Process" },
-      { key: "previous-papers", label: "Previous Papers" },
-      { key: "games", label: "Games" },
-      { key: "image-resizer", label: "Image Resizer" },
-      { key: "pdf-to-word", label: "PDF to Word Converter" },
-      { key: "image-to-pdf", label: "Image to PDF Converter" },
-      { key: "word-to-pdf", label: "Word to PDF Converter" },
-      { key: "ai-interview", label: "Free AI Interview Tool" },
+      { key: "eligibility", labelKey: "sidebar.eligibility" },
+      { key: "syllabus", labelKey: "sidebar.syllabus" },
+      { key: "exam-pattern", labelKey: "sidebar.examPattern" },
+      { key: "selection", labelKey: "sidebar.selection" },
+      { key: "previous-papers", labelKey: "sidebar.previousPapers" },
+      { key: "games", labelKey: "sidebar.games" },
+      { key: "image-resizer", labelKey: "sidebar.imageResizer" },
+      { key: "pdf-to-word", labelKey: "sidebar.pdfToWord" },
+      { key: "image-to-pdf", labelKey: "sidebar.imageToPdf" },
+      { key: "word-to-pdf", labelKey: "sidebar.wordToPdf" },
+      { key: "ai-interview", labelKey: "sidebar.aiInterview" },
     ],
   },
 ];
 
 export default function NotificationsSidebar({ activeKey = null, onSelect }) {
+  const { t } = useTranslation();
+
   const handleClick = (item) => {
     if (typeof onSelect === "function") onSelect(item.key, item);
   };
@@ -66,7 +60,7 @@ export default function NotificationsSidebar({ activeKey = null, onSelect }) {
   return (
     <aside
       className="home-notifications-sidebar"
-      aria-label="Notifications and quick links"
+      aria-label={t("sidebar.aria")}
       style={{
         background: DS.bg1,
         border: `1px solid ${DS.border}`,
@@ -91,10 +85,9 @@ export default function NotificationsSidebar({ activeKey = null, onSelect }) {
               fontWeight: 800,
               letterSpacing: 0.3,
               fontFamily: "'Sora',sans-serif",
-              textTransform: "none",
             }}
           >
-            {section.title}
+            {t(section.titleKey)}
           </header>
 
           <ul style={{ listStyle: "none", padding: "6px 4px 8px", margin: 0 }}>
@@ -124,18 +117,6 @@ export default function NotificationsSidebar({ activeKey = null, onSelect }) {
                       fontFamily: "'Outfit',sans-serif",
                       transition: "background 0.12s, color 0.12s",
                     }}
-                    onMouseEnter={(e) => {
-                      if (!isActive) {
-                        e.currentTarget.style.background = DS.bg2;
-                        e.currentTarget.style.color = DS.saffron;
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isActive) {
-                        e.currentTarget.style.background = "transparent";
-                        e.currentTarget.style.color = baseColor;
-                      }
-                    }}
                   >
                     <span
                       aria-hidden="true"
@@ -144,12 +125,11 @@ export default function NotificationsSidebar({ activeKey = null, onSelect }) {
                         height: 6,
                         borderRadius: "50%",
                         background: DS.saffron,
-                        boxShadow: `0 0 6px ${DS.accentBorder}`,
                         flexShrink: 0,
                       }}
                     />
                     <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {item.label}
+                      {t(item.labelKey)}
                     </span>
                   </button>
                 </li>

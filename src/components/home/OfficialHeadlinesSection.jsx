@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { DS } from "@/theme/designSystem";
 import { useOfficialFeed } from "@/hooks/useOfficialFeed";
 import {
@@ -21,6 +22,7 @@ export default function OfficialHeadlinesSection({
   search = "",
   onClearTopic,
 }) {
+  const { t, i18n } = useTranslation();
   const { items, generatedAt, error } = useOfficialFeed();
 
   const filtered = useMemo(
@@ -56,15 +58,14 @@ export default function OfficialHeadlinesSection({
       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginBottom: 12, flexWrap: "wrap" }}>
         <div>
           <h2 style={{ fontSize: 16, fontWeight: 800, color: DS.white, fontFamily: "'Sora',sans-serif", margin: "0 0 4px" }}>
-            Official wire & notices
+            {t("headlines.wireTitle")}
           </h2>
           <p style={{ fontSize: 12, color: DS.muted, fontFamily: "'Outfit',sans-serif", margin: 0, maxWidth: 720, lineHeight: 1.5 }}>
-            Headlines from official RSS feeds listed in{" "}
-            <code style={{ fontSize: 10.5 }}>scripts/official-sources.json</code> (run{" "}
-            <code style={{ fontSize: 10.5 }}>npm run fetch:official</code>).
+            {t("headlines.wireDesc")}
             {activeLabel ? (
               <>
-                {" "}Filtered by <strong style={{ color: DS.saffron }}>{activeLabel}</strong>.
+                {" "}
+                {t("headlines.filteredBy")} <strong style={{ color: DS.saffron }}>{activeLabel}</strong>.
               </>
             ) : null}
           </p>
@@ -85,12 +86,13 @@ export default function OfficialHeadlinesSection({
                 fontFamily: "'Outfit',sans-serif",
               }}
             >
-              ✕ Clear topic
+              {t("headlines.clearTopic")}
             </button>
           )}
           {generatedAt && (
             <span style={{ fontSize: 10.5, color: DS.muted, fontFamily: "'JetBrains Mono',monospace" }}>
-              Snapshot: {new Date(generatedAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+              {t("headlines.snapshot")}{" "}
+              {new Date(generatedAt).toLocaleString(i18n.language === "en" ? "en-IN" : i18n.language, { dateStyle: "medium", timeStyle: "short" })}
             </span>
           )}
         </div>
@@ -111,18 +113,18 @@ export default function OfficialHeadlinesSection({
               lineHeight: 1.55,
             }}
           >
-            No matching items in the latest RSS snapshot{activeLabel ? ` for ${activeLabel}` : ""}. Browse the official portals below — each opens directly on the recruitment / notifications page.
+            {t("headlines.noSnapshot", { label: activeLabel ? ` (${activeLabel})` : "" })}
           </div>
-          <OfficialPortalGrid sites={fallbackSites} />
+          <OfficialPortalGrid sites={fallbackSites} t={t} />
         </>
       ) : (
-        <FeedList items={filtered} />
+        <FeedList items={filtered} t={t} />
       )}
     </section>
   );
 }
 
-function FeedList({ items }) {
+function FeedList({ items, t }) {
   return (
     <div
       style={{
@@ -183,7 +185,7 @@ function FeedList({ items }) {
           {it.pdfUrls?.length > 0 && (
             <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 6 }}>
               {it.pdfUrls.map((pdf, pi) => {
-                let label = "PDF";
+                let label = t("headlines.pdf");
                 try {
                   const seg = decodeURIComponent(pdf.split("/").pop() || "");
                   if (seg && seg.length < 42) label = seg;
@@ -222,7 +224,7 @@ function FeedList({ items }) {
   );
 }
 
-function OfficialPortalGrid({ sites }) {
+function OfficialPortalGrid({ sites, t }) {
   if (!sites.length) {
     return (
       <div
@@ -236,7 +238,7 @@ function OfficialPortalGrid({ sites }) {
           fontFamily: "'Outfit',sans-serif",
         }}
       >
-        No curated portals found for this filter combination. Clear the state or category to see all official sites.
+        {t("headlines.noPortals")}
       </div>
     );
   }
